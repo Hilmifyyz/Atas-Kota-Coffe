@@ -12,6 +12,8 @@ export default {
       }, 
       colors: {
         'brownpage': '#FFFBF2',
+        'brownbutton': '#CBBDA6',
+        'brownbuttonhover': '#B0A392',
       },
     },
   },
