@@ -2,11 +2,11 @@ import React from "react"
 
 function Navbar() {
     return (
-        <nav className="bg-white shadow-md px-6 py-4">
-            <div className="container mx-auto flex items-center justify-between">
+        <nav className="bg-brownpage shadow-md px-6 py-4 w-full rounded-xl">
+            <div className="max-w-full mx-auto flex items-center justify-between">
                 {/* Left side - Logo */}
                 <div className="flex items-center">
-                    <img src="/path-to-your-logo.png" alt="Logo" className="h-8 w-auto" />
+                    <div className="h-12 w-32 bg-Logo bg-contain bg-no-repeat bg-center"></div>
                 </div>
 
                 {/* Middle - Navigation Links */}
@@ -18,7 +18,7 @@ function Navbar() {
 
                 {/* Right side - Contact, Account, Cart */}
                 <div className="flex items-center space-x-6">
-                    <a href="/contact" className="text-gray-700 hover:text-gray-900">Contact Us</a>
+                    <a href="/contact" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">Contact Us</a>
                     <button className="text-gray-700 hover:text-gray-900">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

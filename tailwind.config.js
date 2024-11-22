@@ -5,7 +5,15 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'Logo': "url('/src/assets/Logo.png')",
+        'LogoMini': "url('/src/assets/Logo Mini.png')",
+      }, 
+      colors: {
+        'brownpage': '#FFFBF2',
+      },
+    },
   },
   plugins: [],
 }
