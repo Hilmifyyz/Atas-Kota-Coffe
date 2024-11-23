@@ -5,7 +5,18 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'Logo': "url('/src/assets/Logo.png')",
+        'LogoMini': "url('/src/assets/Logo Mini.png')",
+        'Coffee': "url('/src/assets/Coffee.png')",
+      }, 
+      colors: {
+        'brownpage': '#FFFBF2',
+        'brownbutton': '#CBBDA6',
+        'brownbuttonhover': '#B0A392',
+      },
+    },
   },
   plugins: [],
 }
