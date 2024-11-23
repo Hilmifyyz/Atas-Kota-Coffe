@@ -9,6 +9,7 @@ export default {
       backgroundImage: {
         'Logo': "url('/src/assets/Logo.png')",
         'LogoMini': "url('/src/assets/Logo Mini.png')",
+        'Coffee': "url('/src/assets/Coffee.png')",
       }, 
       colors: {
         'brownpage': '#FFFBF2',
