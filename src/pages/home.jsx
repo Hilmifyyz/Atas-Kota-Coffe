@@ -130,6 +130,44 @@ function Home() {
                             </button>
                         </div>
                     </div>
+                    {/* Menu Item 6 */}
+                    <div className="flex-none w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
+                        <div className="relative">
+                            {/* Image with gradient overlay */}
+                            <div className="h-[300px] w-full bg-Espresso bg-cover bg-center" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            
+                            {/* Text overlay */}
+                            <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
+                                <h3 className="font-semibold text-xl">Espresso</h3>
+                                <p className="pl-1 text-white">Rp 21.000</p>
+                            </div>
+
+                            {/* Plus button */}
+                            <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                                <span className="text-xl pb-1">+</span>
+                            </button>
+                        </div>
+                    </div>
+                    {/* Menu Item 7 */}
+                    <div className="flex-none w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
+                        <div className="relative">
+                            {/* Image with gradient overlay */}
+                            <div className="h-[300px] w-full bg-Espresso bg-cover bg-center" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                            
+                            {/* Text overlay */}
+                            <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
+                                <h3 className="font-semibold text-xl">Espresso</h3>
+                                <p className="pl-1 text-white">Rp 21.000</p>
+                            </div>
+
+                            {/* Plus button */}
+                            <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                                <span className="text-xl pb-1">+</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
