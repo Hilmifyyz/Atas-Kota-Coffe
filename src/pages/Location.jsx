@@ -2,7 +2,7 @@ import React from "react";
 
 function Location () {
     return (
-        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-pink-300">   
+        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-gray-100">   
             <div className="pt-32 px-4"> 
                 {/* Upper/title */}
                 <div className="flex-col mb-8">
@@ -23,7 +23,7 @@ function Location () {
                         {/* Address */}
                         <div className="flex items-start gap-2 mb-4">
                             <div className="w-6 h-6 mt-1 bg-LocationIcon bg-no-repeat bg-center bg-contain"></div>
-                            <p className="font-sans font-[600]">Gg. Kedawung V, Patemon, Kec. Gn. Pati, Kota Semarang, Jawa Tengah 50228</p>
+                            <a href="https://maps.app.goo.gl/bdNfDzmMRDPVmgvEA" className="font-sans font-[600]">Gg. Kedawung V, Patemon, Kec. Gn. Pati, Kota Semarang, Jawa Tengah 50228</a>
                         </div>
 
                         {/* Opening Hours */}
