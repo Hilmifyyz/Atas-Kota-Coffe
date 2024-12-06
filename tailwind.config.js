@@ -16,6 +16,12 @@ export default {
         'ChickenPasta': "url('/src/assets/Photos/Chicken Pasta.png')",
         'Espresso': "url('/src/assets/Photos/Espresso.png')",
         'RotiBakar': "url('/src/assets/Photos/Roti Bakar.png')",
+        'ClockIcon': "url('/src/assets/photos/Clock.png')",
+        'LocationIcon': "url('/src/assets/photos/Loc.png')",
+        'AccountIcon': "url('/src/assets/photos/Person.png')",
+        'StarIcon': "url('/src/assets/photos/Star.png')",
+        'HalfStarIcon': "url('/src/assets/photos/Half Star.png')",
+        'CheckIcon': "url('/src/assets/photos/Checked.png')",
       }, 
       colors: {
         'brownpage': '#FFFBF2',
