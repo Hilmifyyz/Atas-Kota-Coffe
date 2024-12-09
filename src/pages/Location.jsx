@@ -64,7 +64,7 @@ function Location () {
                     {/* Google Maps Embed */}
                     <div className="xl:mr-20 md:mr-12 w-full md:w-1/2 h-[400px]">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5191.803673597304!2d110.39236576643331!3d-7.057587808442899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e708bd27764634b%3A0x50b2672623549688!2sAtas%20Kota%20Coffee%20%26%20Space!5e1!3m2!1sen!2sid!4v1733482969680!5m2!1sen!2sid"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.5866469852263!2d110.3913036116634!3d-7.057758169137772!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e708bd27764634b%3A0x50b2672623549688!2sAtas%20Kota%20Coffee%20%26%20Space!5e0!3m2!1sen!2sid!4v1733735703633!5m2!1sen!2sid"
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
