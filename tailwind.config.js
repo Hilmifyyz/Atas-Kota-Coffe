@@ -22,6 +22,10 @@ export default {
         'StarIcon': "url('/src/assets/photos/Star.png')",
         'HalfStarIcon': "url('/src/assets/photos/Half Star.png')",
         'CheckIcon': "url('/src/assets/photos/Checked.png')",
+        'CoffeeIcon': "url('/src/assets/photos/vaadin_coffee.png')",
+        'CakeIcon': "url('/src/assets/photos/CakeIcon.png')",
+        'FoodIcon': "url('/src/assets/photos/FoodIcon.png')",
+        'DrinkIcon': "url('/src/assets/photos/DrinkIcon.png')",
       }, 
       colors: {
         'brownpage': '#FFFBF2',

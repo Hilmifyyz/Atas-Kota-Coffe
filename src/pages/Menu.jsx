@@ -28,10 +28,11 @@ function Menu() {
                         {/* Dropdown Menus */}
                         <div className="space-y-2">
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 hover:bg-gray-100 rounded">
-                                    ☕ Coffee
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                    <span className="w-5 h-5 mr-2 bg-CoffeeIcon bg-cover bg-center"></span>
+                                    Coffee
                                 </summary>
-                                <div className="pl-8 py-2 space-y-2">
+                                <div className="pl-9 py-2 text-left space-y-2">
                                     <p className="hover:bg-gray-100 p-1">Latte</p>
                                     <p className="hover:bg-gray-100 p-1">Arabica</p>
                                     <p className="hover:bg-gray-100 p-1">Espresso</p>
@@ -39,21 +40,39 @@ function Menu() {
                             </details>
                             
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 hover:bg-gray-100 rounded">
-                                    🍰 Cake
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                    <span className="w-5 h-5 mr-2 bg-CakeIcon bg-cover bg-center"></span>
+                                    Cake
                                 </summary>
+                                <div className="pl-10 py-2 text-left space-y-2">
+                                    <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </div>
                             </details>
 
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 hover:bg-gray-100 rounded">
-                                    🍝 Food
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                    <span className="w-5 h-5 mr-2 bg-FoodIcon bg-cover bg-center"></span>
+                                    Food
                                 </summary>
+                                <div className="pl-10 py-2 text-left space-y-2">
+                                    <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </div>
                             </details>
 
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 hover:bg-gray-100 rounded">
-                                    🥤 Drinks
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                    <span className="w-5 h-5 mr-2 bg-DrinkIcon bg-cover bg-center"></span>
+                                    Drinks
                                 </summary>
+                                <div className="pl-10 py-2 text-left space-y-2">
+                                    <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </div>
                             </details>
                         </div>
                     </div>
