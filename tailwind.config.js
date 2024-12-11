@@ -26,6 +26,8 @@ export default {
         'CakeIcon': "url('/src/assets/photos/CakeIcon.png')",
         'FoodIcon': "url('/src/assets/photos/FoodIcon.png')",
         'DrinkIcon': "url('/src/assets/photos/DrinkIcon.png')",
+        'SearchIcon': "url('/src/assets/photos/Search.png')",
+        'PlusCartIcon': "url('/src/assets/photos/PlusCart.png')",
       }, 
       colors: {
         'brownpage': '#FFFBF2',

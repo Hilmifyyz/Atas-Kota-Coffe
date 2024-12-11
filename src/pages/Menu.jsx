@@ -17,12 +17,13 @@ function Menu() {
                         
                         {/* Search Bar */}
                         <div className="relative">
+                            
                             <input 
                                 type="text" 
                                 placeholder="Cari Produk"
                                 className="w-full px-4 py-2 border rounded-lg"
                             />
-                            <span className="absolute right-3 top-2.5">🔍</span>
+                            <span className="absolute right-3 w-5 h-5 bg-SearchIcon bg-cover top-2.5"></span>
                         </div>
 
                         {/* Dropdown Menus */}
@@ -87,7 +88,7 @@ function Menu() {
                     </div>
 
                     {/* Menu Grid - Changed to flex with wrap */}
-                    <div className="flex flex-wrap gap-6">
+                    <div className="flex flex-wrap gap-4">
                         {/* Menu Item - Added fixed width */}
                         {[...Array(8)].map((_, index) => (
                             <div key={index} className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
