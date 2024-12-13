@@ -1,32 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
+import rotiImage from "/src/assets/Photos/Roti Bakar Big.png";
+import latteImage from "/src/assets/Photos/Caffe Latte.png";
+import espressoImage from "/src/assets/Photos/Espresso.png";
 
-function Item() {
+const Item = () => {
+    const [quantity, setQuantity] = useState(2);
+    const [selectedImage, setSelectedImage] = useState(rotiImage);
+
+    const images = [rotiImage, latteImage, espressoImage];
+
+    const handleIncrement = () => {
+        setQuantity(prevQuantity => prevQuantity + 1);
+    };
+
+    const handleDecrement = () => {
+        setQuantity(prevQuantity => prevQuantity > 1 ? prevQuantity - 1 : 1);
+    };
+
+    const handleInputChange = (e) => {
+        const value = parseInt(e.target.value) || 1;
+        setQuantity(value < 1 ? 1 : value);
+    };
+
+    const handleThumbnailClick = (imagePath) => {
+        setSelectedImage(imagePath);
+    };
+
     return (
-        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-gray-100">
+        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2]">
             <div className="max-w-6xl mx-auto p-4 md:p-8 pt-24 md:pt-32 flex flex-col md:flex-row md:gap-8">
                 {/* Image gallery - Full width on mobile, half width on desktop */}
                 <div className="w-full md:w-1/2 mb-8 md:mb-0">
+                    {/* Main Image */}
                     <div className="aspect-square bg-white rounded-lg overflow-hidden mb-4">
                         <div 
                             className="w-full h-full bg-cover bg-center bg-no-repeat"
-                            style={{ backgroundImage: 'url("/src/assets/Photos/Roti Bakar Big.png")' }}
+                            style={{ backgroundImage: `url(${selectedImage})` }}
                         />
                     </div>
+
+                    {/* Image Gallery */}
                     <div className="grid grid-cols-3 gap-4">
-                        {[1, 2, 3].map((idx) => (
-                            <div key={idx} className="aspect-square bg-white rounded-lg overflow-hidden cursor-pointer">
+                        {images.map((image, index) => (
+                            <div 
+                                key={index}
+                                className={`aspect-square bg-white rounded-lg overflow-hidden cursor-pointer ${
+                                    selectedImage === image ? 'ring-2 ring-[#b69d74]' : ''
+                                }`}
+                                onClick={() => handleThumbnailClick(image)}
+                            >
                                 <div 
-                                    className="w-full h-full bg-cover bg-center bg-no-repeat"
-                                    style={{ backgroundImage: 'url("/coffee-latte.jpg")' }}
-                                />
+                                    className="w-full h-full bg-cover bg-center bg-no-repeat" 
+                                    style={{ backgroundImage: `url(${image})` }}
+                                /> 
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Product details - Full width on mobile, half width on desktop */}
+                {/* Product details - Full width on mobile, half width on desktop */}   
                 <div className="w-full md:w-1/2">
-                    <h1 className="text-2xl md:text-3xl font-bold mb-4">Coffee Latte</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold mb-4">Roti Bakar</h1>
                     <p className="text-gray-600 mb-6">
                         Roti Bakar is a crispy, toasted snack with soft bread filled with delicious spreads like chocolate, cheese, or jam. Perfect for any time of day, it’s a simple, satisfying treat everyone loves.
                     </p>
@@ -52,22 +86,33 @@ function Item() {
                     <div className="flex items-center gap-4 mb-6">
                         <span className="text-gray-700">Jumlah</span>
                         <div className="flex items-center border rounded-md">
-                            <button className="px-3 md:px-4 py-2 text-xl">-</button>
+                            <button 
+                            className="px-3 md:px-4 py-2 text-xl"
+                            onClick={handleDecrement}
+                            >
+                            -
+                            </button>
                             <input 
-                                type="number" 
-                                className="w-12 md:w-16 text-center border-x py-2" 
-                                value="1"
-                                readOnly
+                                type="text" 
+                                value={quantity} 
+                                onChange={handleInputChange}
+                                className="w-12 md:w-16 text-center border-x py-2 bg-[#FFFBF2]" 
+                                
                             />
-                            <button className="px-3 md:px-4 py-2 text-xl">+</button>
+                            <button 
+                            className="px-3 md:px-4 py-2 text-xl"
+                            onClick={handleIncrement}
+                            >
+                            +
+                            </button>
                         </div>
                     </div>
 
                     <div className="flex gap-4">
-                        <button className="flex-1 px-4 md:px-6 py-3 border-2 border-[#b69d74] text-[#b69d74] rounded-lg font-semibold text-sm md:text-base">
+                        <button className="flex-1 px-4 md:px-6 py-3 border-2 hover:bg-[#ccb796] hover:text-white hover:border-[#ccb796] border-[#b69d74] text-[#b69d74] rounded-lg font-semibold text-sm md:text-base">
                             Add to cart
                         </button>
-                        <button className="flex-1 px-4 md:px-6 py-3 bg-[#b69d74] text-white rounded-lg font-semibold text-sm md:text-base">
+                        <button className="flex-1 px-4 md:px-6 py-3 hover:bg-[#ad8e5b] bg-[#b69d74] text-white rounded-lg font-semibold text-sm md:text-base">
                             Buy
                         </button>
                     </div>

@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-function Menu() {
+const Menu = () => {
     return (
-        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-gray-100">
+        <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2]">
             <div className="flex pt-20">
                 {/* Left Side - Navigation (Added fixed positioning) */}
                 <div className="w-[280px] min-h-screen bg-white ml-10 mt-6 rounded-xl fixed p-6 shadow-lg">
@@ -34,9 +35,15 @@ function Menu() {
                                     Coffee
                                 </summary>
                                 <div className="pl-9 py-2 text-left space-y-2">
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                    </Link>
                                 </div>
                             </details>
                             
@@ -46,9 +53,15 @@ function Menu() {
                                     Cake
                                 </summary>
                                 <div className="pl-10 py-2 text-left space-y-2">
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                    </Link>
                                 </div>
                             </details>
 
@@ -58,9 +71,15 @@ function Menu() {
                                     Food
                                 </summary>
                                 <div className="pl-10 py-2 text-left space-y-2">
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    </Link>
+                                    <Link to="/menu/">
                                     <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                    </Link>
                                 </div>
                             </details>
 
@@ -70,9 +89,15 @@ function Menu() {
                                     Drinks
                                 </summary>
                                 <div className="pl-10 py-2 text-left space-y-2">
+                                    <Link to="/menu/item">
                                     <p className="hover:bg-gray-100 p-1">Latte</p>
+                                    </Link>
+                                    <Link to="/menu/item">
                                     <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                    </Link>
+                                    <Link to="/menu/item">
                                     <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                    </Link>
                                 </div>
                             </details>
                         </div>
@@ -91,6 +116,7 @@ function Menu() {
                     <div className="flex flex-wrap gap-4">
                         {/* Menu Item - Added fixed width */}
                         {[...Array(8)].map((_, index) => (
+                            <Link to="/menu/item">
                             <div key={index} className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
                                 <div className="relative">
                                     <div className="h-[300px] w-full bg-Alfredo bg-cover bg-center" />
@@ -106,6 +132,7 @@ function Menu() {
                                     </button>
                                 </div>
                             </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
