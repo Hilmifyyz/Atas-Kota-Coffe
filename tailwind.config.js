@@ -10,6 +10,7 @@ export default {
       backgroundImage: {
         'Logo': "url('/src/assets/Photos/Logo.png')",
         'LogoMini': "url('/src/assets/Photos/Logo Mini.png')",
+        'GoogleIcon': "url('/src/assets/Photos/devicon_google.png')",
         'Coffee': "url('/src/assets/Photos/Coffee.png')",
         'Alfredo': "url('/src/assets/Photos/Alfredo Pasta.png')",
         'CaffeLatte': "url('/src/assets/Photos/Caffe Latte.png')",
