@@ -4,7 +4,7 @@ import Navbar from './components/Navbar'
 import Menu from './pages/Menu';
 import Location from './components/Location';
 import HomeFirst from './components/HomeFirst';
-import Home from './pages/home';
+// import Home from './pages/home';
 import Item from './pages/Item';
 import Keranjang from './pages/Keranjang';
 import Login from './pages/Login';
@@ -23,8 +23,14 @@ function App() {
                   <Location/>
                 </div>
               }/>
+              
               <Route path='/menu' element={<Menu/>}/>
               <Route path='/menu/item' element={<Item/>}/>
+              <Route path='/location' element={
+                <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2]">
+                  <Location/>
+                </div>
+              }/>
               <Route path='/cart' element={<Keranjang/>}/>
               <Route path='/login' element={<Login/>}/>
             </Routes>
