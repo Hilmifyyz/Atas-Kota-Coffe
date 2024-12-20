@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const HomeFirst = () => {
     return (
-        <section className="w-full min-h-screen bg-[#FFFBF2] top-0 m-0 p-0">
+        <section id="Top" className="w-full min-h-screen bg-[#FFFBF2] top-0 m-0 p-0">
             {/* Hero Section */}
             <div className="pt-24 px-4 md:px-12 lg:px-24 ">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">

@@ -8,6 +8,7 @@ import HomeFirst from './components/HomeFirst';
 import Item from './pages/Item';
 import Keranjang from './pages/Keranjang';
 import Login from './pages/Login';
+import Footer from './components/Footer';
 
 function App() {
 
@@ -18,21 +19,28 @@ function App() {
           <div className="Content">
             <Routes>
               <Route path='/' element={
-                <div className="w-screen min-h-screen absolute overflow-hidden overflow-x-hidden top-0 left-0 right-0">
+                <div className="  min-h-screen absolute overflow-hidden overflow-x-hidden top-0 left-0 right-0">
                   <HomeFirst/>
                   <Location/>
+                  <Footer/> 
                 </div>
               }/>
               
-              <Route path='/menu' element={<Menu/>}/>
-              <Route path='/menu/item' element={<Item/>}/>
-              <Route path='/location' element={
-                <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2]">
-                  <Location/>
-                </div>
+              <Route path='/menu' element={
+                <Menu/>
               }/>
-              <Route path='/cart' element={<Keranjang/>}/>
-              <Route path='/login' element={<Login/>}/>
+              
+              <Route path='/menu/item' element={
+                <Item/>
+              }/>
+              
+              <Route path='/cart' element={
+                <Keranjang/>
+              }/>
+
+              <Route path='/login' element={
+                <Login/>
+              }/>
             </Routes>
           </div>
         </div>

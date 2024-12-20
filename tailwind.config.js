@@ -10,7 +10,9 @@ export default {
       backgroundImage: {
         'Logo': "url('/src/assets/Photos/Logo.png')",
         'LogoMini': "url('/src/assets/Photos/Logo Mini.png')",
+        'LogoFooter': "url('/src/assets/Photos/Logo Cropped.png')",
         'GoogleIcon': "url('/src/assets/Photos/devicon_google.png')",
+        'PhoneIcon': "url('/src/assets/Photos/material-symbols_call.png')",
         'Coffee': "url('/src/assets/Photos/Coffee.png')",
         'Alfredo': "url('/src/assets/Photos/Alfredo Pasta.png')",
         'CaffeLatte': "url('/src/assets/Photos/Caffe Latte.png')",
