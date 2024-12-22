@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 const HomeMenu = () => {
     return (
-        <section className="w-screen min-h-screen border-t-2 border-[#D9D9D9] bg-brownpage">
-            <div className="flex flex-row gap-4">
-                <div className="flex flex-col p-6 w-[350px] min-h-screen border-r-2 border-[#D9D9D9]">
+        <section className="w-screen min-h-[75vh] border-t-2 border-[#D9D9D9] bg-brownpage">
+            <div className="flex flex-row">
+                <div className="flex flex-col p-6 w-[350px] min-h-[75vh] border-r-2 border-[#D9D9D9]">
                     <div className="mb-8">
                         <div className="w-full h-14 bg-LogoFooter bg-contain bg-no-repeat bg-center"></div>
                     </div>
@@ -38,8 +38,38 @@ const HomeMenu = () => {
                             </div>
                         </details>
                 </div>
-                <div className="w-full h-full bg-blue-500 rounded-lg">
-                    
+                <div className="w-full min-h-full pt-8">
+                    <div className="mb-8">
+                        <h2 className="font-sans font-[700] text-2xl mb-2">Menu Kami</h2>
+                        <p className="font-sans font-[500] text-[#716C6C]">Nikmati berbagai menu kami yang banyak variannya</p>
+                    </div>
+                    <div className="flex flex-wrap gap-4 px-6">
+                        {/* Menu Item - Added fixed width */}
+                        {[...Array(8)].map((_, index) => (
+                            <Link to="/menu/item">
+                            <div key={index} className="w-[230px] bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                                <div className="relative">
+                                    <div className="h-[300px] w-full bg-Alfredo bg-cover bg-center" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                    
+                                    <div className="absolute bottom-0 text-left left-0 p-4 text-white">
+                                        <h3 className="font-semibold text-xl">Alfredo Pasta</h3>
+                                        <p className="pl-1 text-white">Rp 21.000</p>
+                                    </div>
+
+                                    <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                                        <span className="text-xl pb-1">+</span>
+                                    </button>
+                                </div>
+                            </div>
+                            </Link>
+                        ))}
+                    </div>
+                    <Link to="/menu" className="flex justify-center mt-4">
+                        <div className="p-4 bg-[#E6D5B7] m-6 min-w-64 rounded-[26px]">
+                            <h1 className="font-sans font-[500] text-[20px]">See All</h1>
+                        </div>
+                    </Link>
                 </div>
             </div>
         </section>

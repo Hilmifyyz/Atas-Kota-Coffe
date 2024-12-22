@@ -5,11 +5,12 @@ import Menu from './pages/Menu';
 import Location from './components/Location';
 import HomeFirst from './components/HomeFirst';
 import HomeMenu from './components/HomeMenu';
-// import Home from './pages/home';
 import Item from './pages/Item';
 import Keranjang from './pages/Keranjang';
 import Login from './pages/Login';
 import Footer from './components/Footer';
+import HomeGallery from './components/HomeGallery';
+import Checkout from './pages/CheckOut';
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
                   <HomeFirst/>
                   <HomeMenu/>
                   <Location/>
+                  <HomeGallery/>
                   <Footer/> 
                 </div>
               }/>
@@ -42,6 +44,9 @@ function App() {
 
               <Route path='/login' element={
                 <Login/>
+              }/>
+              <Route path='/checkout' element={
+                <Checkout/>
               }/>
             </Routes>
           </div>

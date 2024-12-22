@@ -31,7 +31,7 @@ const Footer = () => {
                         <a href="/#Location" className="font-sans font-[600] text-[24px]">Location</a>
                     </li>
                     <li className="xl:text-left md:text-left text-center">
-                        <a href="/#Gallery" className="font-sans font-[600] text-[24px]">Gallery</a>
+                        <a href="/#gallery" className="font-sans font-[600] text-[24px]">Gallery</a>
                     </li>
                 </ul>
             </div>

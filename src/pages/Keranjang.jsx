@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Keranjang = () => {
     const [quantity, setQuantity] = useState(2);
@@ -79,9 +80,9 @@ const Keranjang = () => {
                                 <span>Total</span>
                                 <span className="font-medium">Rp. 21.000</span>
                             </div>
-                            <button className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg">
+                            <Link to="/checkout" className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg">
                                 Buy
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
