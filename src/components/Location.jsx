@@ -2,7 +2,7 @@ import React from "react";
 
 const Location = () => {
     return (
-        <section id="Location" className="w-full min-h-[70vh] top-0 bg-[#FFFBF2] m-0 p-0">   
+        <section id="Location" className="w-full min-h-[70vh] top-0 bg-brownpage m-0 p-0">   
             <div className="pt-32 px-4"> 
                 {/* Upper/title */}
                 <div className="flex-col mb-8">
