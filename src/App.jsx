@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Menu from './pages/Menu';
 import Location from './components/Location';
 import HomeFirst from './components/HomeFirst';
+import HomeMenu from './components/HomeMenu';
 // import Home from './pages/home';
 import Item from './pages/Item';
 import Keranjang from './pages/Keranjang';
@@ -21,6 +22,7 @@ function App() {
               <Route path='/' element={
                 <div className="  min-h-screen absolute overflow-hidden overflow-x-hidden top-0 left-0 right-0">
                   <HomeFirst/>
+                  <HomeMenu/>
                   <Location/>
                   <Footer/> 
                 </div>
