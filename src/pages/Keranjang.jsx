@@ -80,9 +80,9 @@ const Keranjang = () => {
                                 <span>Total</span>
                                 <span className="font-medium">Rp. 21.000</span>
                             </div>
-                            <Link to="/checkout" className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg">
-                                Buy
-                            </Link>
+                            <button className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg hover:bg-[#d4b87c] transition-colors">
+                                <Link to="/checkout" className="w-full px-32">Buy</Link>
+                            </button>
                         </div>
                     </div>
                 </div>
