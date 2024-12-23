@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Footer from './components/Footer';
 import HomeGallery from './components/HomeGallery';
 import Checkout from './pages/CheckOut';
+import Detail from './pages/detail';
 
 function App() {
 
@@ -47,6 +48,9 @@ function App() {
               }/>
               <Route path='/checkout' element={
                 <Checkout/>
+              }/>
+              <Route path='/detail' element={
+                <Detail/>
               }/>
             </Routes>
           </div>
