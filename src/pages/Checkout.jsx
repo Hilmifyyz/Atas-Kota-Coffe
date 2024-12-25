@@ -66,14 +66,15 @@ const Checkout = () => {
                                     </div>
                                 </button>
                             </div>
-                            <button className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg hover:bg-[#d4b87c] font-sans font-[700] text-lg transition-colors">
-                                Buy
-                            </button>
+                            <div className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg hover:bg-[#d4b87c] font-sans font-[700] text-lg items-center transition-colors">
+                                <Link to="/detail" className="w-full h-full px-28 py-2">Buy</Link>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
+            
+            {/* Popup Payment Method */}
             {
                 openPopup && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-end">
