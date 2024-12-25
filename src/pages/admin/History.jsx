@@ -119,7 +119,7 @@ const History = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default History;

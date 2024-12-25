@@ -120,6 +120,6 @@ const Item = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Item;
