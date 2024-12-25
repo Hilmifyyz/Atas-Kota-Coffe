@@ -35,7 +35,7 @@ const Transaction = () => {
             <h1 className="font-sans font-[700] text-3xl my-6">Transaction</h1>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Transaction;

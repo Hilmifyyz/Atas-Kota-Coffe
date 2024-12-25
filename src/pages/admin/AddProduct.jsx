@@ -60,7 +60,7 @@ const AddProduct = () => {
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default AddProduct;
