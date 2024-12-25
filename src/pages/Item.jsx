@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import rotiImage from "/src/assets/Photos/Roti Bakar Big.png";
 import latteImage from "/src/assets/Photos/Caffe Latte.png";
 import espressoImage from "/src/assets/Photos/Espresso.png";

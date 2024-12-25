@@ -1,4 +1,3 @@
-import React from "react";
 import Top1 from "../assets/Photos/gallery/Top-1.png";
 import Top2 from "../assets/Photos/gallery/Top-2.png";
 import Top3 from "../assets/Photos/gallery/Top-3.png";
