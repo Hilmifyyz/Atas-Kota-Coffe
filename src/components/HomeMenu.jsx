@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const HomeMenu = () => {
     return (
-        <section className="w-screen min-h-[75vh] border-t-2 border-[#D9D9D9] bg-brownpage">
+        <section id="menu" className="w-screen min-h-[75vh] border-t-2 border-[#D9D9D9] bg-brownpage">
             <div className="flex flex-row">
                 <div className="flex flex-col p-6 w-[350px] min-h-[75vh] border-r-2 border-[#D9D9D9]">
                     <div className="mb-8">

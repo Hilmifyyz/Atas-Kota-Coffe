@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-const Checkout = () => {
+const CheckOut = () => {
 
     const [openPopup, setOpenPopup] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
@@ -83,7 +83,7 @@ const Checkout = () => {
                             ${isClosing ? 'animate-slideDown' : 'animate-slideUp'}`}
                         >
                             <h2 className="font-sans font-[700] text-2xl mb-2">Virtual Account</h2>
-                            <label for="bca" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
+                            <label htmlFor="bca" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
                             <div className="flex items-center bg-BCAIcon bg-cover bg-no-repeat w-[100px] h-8"/>
                             <div className="*:font-sans *:font-[700]  justify-center">
                                 <div className="flex flex-col max-w-[150px] mx-auto">
@@ -91,10 +91,10 @@ const Checkout = () => {
                                     <h2 className="text-left text-xs text-black/45 ">Fee $0,18</h2>
                                 </div>
                             </div>
-                            <input name="payment_method" id="bca" value="bca" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500" wfd-id="id26"/>
+                            <input name="payment_method" id="bca" value="bca" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500"/>
                             </label>
 
-                            <label for="mandiri" className="my-2text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-800 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
+                            <label htmlFor="mandiri" className="my-2text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-800 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
                             <div className="flex items-center bg-MandiriIcon bg-cover bg-no-repeat w-[110px] h-8"/>
                             <div className="*:font-sans *:font-[700]  justify-center">
                                 <div className="flex flex-col max-w-[150px] mx-auto">
@@ -102,10 +102,10 @@ const Checkout = () => {
                                     <h2 className="text-left text-xs text-black/45 ">Fee $0,20</h2>
                                 </div>
                             </div>
-                            <input name="payment_method" id="mandiri" value="mandiri" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500" wfd-id="id27"/>
+                            <input name="payment_method" id="mandiri" value="mandiri" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500"/>
                             </label>
 
-                            <label for="bni" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-800 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
+                            <label htmlFor="bni" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-800 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
                             <div className="flex items-center bg-BNIIcon bg-cover w-[120px] h-8"/>
                             <div className="*:font-sans *:font-[700]  justify-center">
                                 <div className="flex flex-col max-w-[150px] mx-auto">
@@ -113,12 +113,12 @@ const Checkout = () => {
                                     <h2 className="text-left text-xs text-black/45 ">Fee $0,20</h2>
                                 </div>
                             </div>
-                            <input name="payment_method" id="bni" value="bni" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500" wfd-id="id28"/>
+                            <input name="payment_method" id="bni" value="bni" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500"/>
                             </label>
 
 
                             <h2 className="font-sans font-[700] text-2xl mt-4 mb-2">Instan Payment</h2>
-                            <label for="dana" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
+                            <label htmlFor="dana" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
                             <div className="flex items-center bg-DanaIcon bg-cover bg-no-repeat w-[110px] h-8"/>
                             <div className="*:font-sans *:font-[700]  justify-center">
                                 <div className="flex flex-col max-w-[150px] mx-auto">
@@ -128,9 +128,9 @@ const Checkout = () => {
                                     <h2 className="text-left text-xs text-black/45 ">Transaction fee 0.3%</h2>
                                 </div>
                             </div>
-                            <input name="payment_method" id="dana" value="dana" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500" wfd-id="id26"/>
+                            <input name="payment_method" id="dana" value="dana" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500"/>
                             </label>
-                            <label for="qris" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
+                            <label htmlFor="qris" className="my-2 text-slate-700 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-900 has-[:checked]:bg-indigo-50 grid grid-cols-[24px_1fr_auto] items-center gap-6 rounded-2xl w-[400px] md:w-[500px] p-4 ring-1 ring-transparent bg-white hover:bg-slate-100">
                             <div className="flex items-center bg-QRISIcon bg-cover bg-no-repeat w-[100px] h-8"/>
                             <div className="*:font-sans *:font-[700]  justify-center">
                                 <div className="flex flex-col max-w-[150px] mx-auto">
@@ -140,7 +140,7 @@ const Checkout = () => {
                                     <h2 className="text-left text-xs text-black/45">Transaction fee 0.3%</h2>
                                 </div>
                             </div>
-                            <input name="payment_method" id="qris" value="qris" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500" wfd-id="id26"/>
+                            <input name="payment_method" id="qris" value="qris" type="radio" className="box-content h-1.5 w-1.5 appearance-none rounded-full border-[5px] border-white bg-white bg-clip-padding outline-none ring-1 ring-gray-950/10 checked:border-indigo-500 checked:ring-indigo-500"/>
                             </label>
 
                             <button onClick={handleClose} className="w-[400px] text-black py-2 mt-4 rounded-lg bg-brownbutton hover:bg-[#d4b87c] font-sans font-[700] text-lg transition-colors">
@@ -155,4 +155,4 @@ const Checkout = () => {
     );
 };
 
-export default Checkout;
+export default CheckOut;

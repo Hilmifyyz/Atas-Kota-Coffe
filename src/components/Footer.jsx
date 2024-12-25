@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFacebook, faTiktok, faInstagram, faTwitter, } from '@fortawesome/free-brands-svg-icons';
 
 const Footer = () => {
     return (
@@ -43,25 +41,21 @@ const Footer = () => {
                 <ul className="flex flex-col gap-2">
                     <li className="xl:text-left md:text-left text-center">
                         <a href="https://www.instagram.com/ataskota?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="font-sans font-[600] text-[24px] flex items-center gap-2">
-                            <FontAwesomeIcon icon="fa-brands fa-facebook" />
                             Facebook
                         </a>
                     </li>
                     <li className="xl:text-left md:text-left text-center">
                         <a href="https://www.instagram.com/ataskota?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="font-sans font-[600] text-[24px] flex items-center gap-2">
-                            <FontAwesomeIcon icon="fa-brands fa-tiktok" />
                             Tiktok
                         </a>
                     </li>
                     <li className="xl:text-left md:text-left text-center">
                         <a href="https://www.instagram.com/ataskota?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="font-sans font-[600] text-[24px] flex items-center gap-2">
-                            <FontAwesomeIcon icon="fa-brands fa-instagram" />
                             Instagram
                         </a>
                     </li>
                     <li className="xl:text-left md:text-left text-center">
                         <a href="https://www.instagram.com/ataskota?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" className="font-sans font-[600] text-[24px] flex items-center gap-2">
-                            <FontAwesomeIcon icon="fa-brands fa-twitter" />
                             Twitter
                         </a>
                     </li>

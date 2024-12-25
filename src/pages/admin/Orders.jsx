@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CalendarIcon, ArrowTrendingUpIcon, MagnifyingGlassIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
-import { Description, Field, Label, Select } from '@headlessui/react'
+import { Select } from '@headlessui/react'
 
 
 const Orders = () => {
@@ -79,16 +79,16 @@ const Orders = () => {
                     </div>
                     {/* Table */}
                     <div className="flex flex-row place-content-between mt-10">
-                        <div class="relative m-[2px] mb-3 mr-5 float-left">
-                            <label for="inputSearch" class="sr-only">Cari</label>
-                            <input id="inputSearch" type="text" placeholder="Cari" class="block w-64 rounded-lg border py-3 pl-10 pr-4 text-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                        <div className="relative m-[2px] mb-3 mr-5 float-left">
+                            <label htmlFor="inputSearch" className="sr-only">Cari</label>
+                            <input id="inputSearch" type="text" placeholder="Cari" className="block w-64 rounded-lg border py-3 pl-10 pr-4 text-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 transform">
                                 <MagnifyingGlassIcon className="h-6 w-6 text-neutral-500"/>
                             </span>
                         </div>
-                        <div class="relative flex items-center m-[2px] mb-3 float-right w-40 border">
-                            <label for="inputFilter" class="sr-only">Filter</label>
-                            <Select id="inputFilter" class="appearance-none rounded-lg border dark:border-none w-full h-full pl-10 p-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400">
+                        <div className="relative flex items-center m-[2px] mb-3 float-right w-40 border">
+                            <label htmlFor="inputFilter" className="sr-only">Filter</label>
+                            <Select id="inputFilter" className="appearance-none rounded-lg border dark:border-none w-full h-full pl-10 p-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400">
                             <option value="1" selected>Last week</option>
                             <option value="2">Last month</option>
                             <option value="3">Yesterday</option>
@@ -226,7 +226,7 @@ const Orders = () => {
                                 <h1 className="font-bold">12</h1>
                             </div>
 
-                            <ul class="list-style-none flex">
+                            <ul className="list-style-none flex">
                             <li>
                                 <a href="#!" className="relative block rounded bg-transparent px-3 py-1.5 text-sm text-black transition-all duration-300 hover:bg-black hover:text-white">
                                 Previous
@@ -235,7 +235,7 @@ const Orders = () => {
                             <li aria-current="page">
                                 <a href="#!" className="relative block rounded bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 transition-all duration-300">
                                 1
-                                <span class="absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">
+                                <span className="absolute -m-px h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0,0,0,0)]">
                                     (current)
                                 </span>
                                 </a>
