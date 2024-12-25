@@ -1,4 +1,3 @@
-import React from "react";
 import LogoPutih from "../assets/Photos/LogoPutih.png";
 
 const Detail = () => {

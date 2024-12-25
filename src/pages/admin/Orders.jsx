@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { CalendarIcon, ArrowTrendingUpIcon, MagnifyingGlassIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Select } from '@headlessui/react'
