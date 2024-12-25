@@ -10,7 +10,7 @@ import Keranjang from './pages/Keranjang';
 import Login from './pages/Login';
 import Footer from './components/Footer';
 import HomeGallery from './components/HomeGallery';
-import Checkout from './pages/CheckOut';
+import CheckOut from './pages/CheckOut';
 import Detail from './pages/detail';
 import Admin from './pages/admin/Product';
 import Transaction from './pages/admin/Transaction';
@@ -48,7 +48,7 @@ function App() {
                     <Route path='/menu/item' element={<Item/>} />
                     <Route path='/cart' element={<Keranjang/>} />
                     <Route path='/login' element={<Login/>} />
-                    <Route path='/checkout' element={<Checkout/>} />
+                    <Route path='/checkout' element={<CheckOut/>} />
                     <Route path='/detail' element={<Detail/>} />
                   </Routes>
                 </div>
