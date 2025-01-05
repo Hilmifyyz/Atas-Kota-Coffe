@@ -1,9 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
-import { addProduct } from "../../firebase";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { updateProduct } from "../../firebase";
 import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdCloudUpload } from "react-icons/md";
 
-const AddProduct = () => {
+const EditProduct = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,6 +18,22 @@ const AddProduct = () => {
         imageUrl: ""
     });
     const [previewUrl, setPreviewUrl] = useState("");
+
+    useEffect(() => {
+        // Get product data from localStorage
+        const productData = localStorage.getItem('editProduct');
+        if (productData) {
+            const product = JSON.parse(productData);
+            setFormData({
+                title: product.title || "",
+                price: product.price || "",
+                category: product.category || "",
+                description: product.description || "",
+                imageUrl: product.imageUrl || ""
+            });
+            setPreviewUrl(product.imageUrl || "");
+        }
+    }, []);
 
     // Predefined categories
     const categories = {
@@ -106,7 +123,7 @@ const AddProduct = () => {
         }
         setLoading(true);
         try {
-            await addProduct({
+            await updateProduct(id, {
                 title: formData.title,
                 price: parseFloat(formData.price),
                 category: formData.category,
@@ -116,8 +133,8 @@ const AddProduct = () => {
 
             navigate("/admin/product");
         } catch (error) {
-            console.error("Error adding product:", error);
-            alert("Failed to add product. Please try again.");
+            console.error("Error updating product:", error);
+            alert("Failed to update product. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -193,12 +210,12 @@ const AddProduct = () => {
                 <h1 className="font-sans font-[700] text-2xl md:text-3xl mb-6">Products</h1>
                 <div className="mx-2 md:mx-10">
                     <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-                        <h1 className="font-sans font-[600] text-xl md:text-2xl">Add Product</h1>
+                        <h1 className="font-sans font-[600] text-xl md:text-2xl">Edit Product</h1>
                         <button 
                             onClick={handleSubmit}
                             disabled={loading}
                             className="py-2 px-8 md:px-12 bg-white border border-[#9B9999] rounded-lg font-sans font-[700] text-lg md:text-xl text-[#818080] disabled:opacity-50">
-                            {loading ? "Saving..." : "Save"}
+                            {loading ? "Saving..." : "Update"}
                         </button>
                     </div>
                     <form className="w-full mt-6 md:mt-10 p-4 md:p-10 bg-white rounded-xl border">
@@ -325,4 +342,4 @@ const AddProduct = () => {
     );
 };
 
-export default AddProduct;
+export default EditProduct; 

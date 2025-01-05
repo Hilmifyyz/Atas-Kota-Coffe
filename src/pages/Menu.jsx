@@ -1,10 +1,64 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getProducts } from "../firebase";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Menu = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const { addToCart } = useCart();
+    const { user } = useAuth();
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const productsData = await getProducts();
+                setProducts(productsData);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    // Filter products based on search and category
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = !selectedCategory || product.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    const handleAddToCart = async (e, product) => {
+        e.preventDefault(); // Prevent navigation to product details
+        
+        if (!user) {
+            window.location.href = '/login';
+            return;
+        }
+
+        await addToCart(product);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+    };
+
     return (
         <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2]">
+            {/* Success Toast */}
+            {showToast && (
+                <div className="fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300">
+                    Item added to cart!
+                </div>
+            )}
+
             <div className="flex pt-20">
-                {/* Left Side - Navigation (Added fixed positioning) */}
+                {/* Left Side - Navigation */}
                 <div className="w-[280px] min-h-screen bg-white ml-10 mt-6 rounded-xl fixed p-6 shadow-lg">
                     {/* Logo */}
                     <div className="mb-8">
@@ -17,10 +71,11 @@ const Menu = () => {
                         
                         {/* Search Bar */}
                         <div className="relative">
-                            
                             <input 
                                 type="text" 
                                 placeholder="Cari Produk"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full px-4 py-2 border rounded-lg"
                             />
                             <span className="absolute right-3 w-5 h-5 bg-SearchIcon bg-cover top-2.5"></span>
@@ -29,7 +84,8 @@ const Menu = () => {
                         {/* Dropdown Menus */}
                         <div className="space-y-2">
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                        onClick={() => setSelectedCategory('hot-coffee')}>
                                     <span className="w-5 h-5 mr-2 bg-CoffeeIcon bg-cover bg-center"></span>
                                     Coffee
                                 </summary>
@@ -47,7 +103,8 @@ const Menu = () => {
                             </details>
                             
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                        onClick={() => setSelectedCategory('cake')}>
                                     <span className="w-5 h-5 mr-2 bg-CakeIcon bg-cover bg-center"></span>
                                     Cake
                                 </summary>
@@ -65,7 +122,8 @@ const Menu = () => {
                             </details>
 
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                        onClick={() => setSelectedCategory('food')}>
                                     <span className="w-5 h-5 mr-2 bg-FoodIcon bg-cover bg-center"></span>
                                     Food
                                 </summary>
@@ -83,7 +141,8 @@ const Menu = () => {
                             </details>
 
                             <details className="cursor-pointer">
-                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                                <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                        onClick={() => setSelectedCategory('drinks')}>
                                     <span className="w-5 h-5 mr-2 bg-DrinkIcon bg-cover bg-center"></span>
                                     Drinks
                                 </summary>
@@ -103,7 +162,7 @@ const Menu = () => {
                     </div>
                 </div>
 
-                {/* Right Side - Menu Items (Added margin-left to account for fixed sidebar) */}
+                {/* Right Side - Menu Items */}
                 <div className="flex-1 p-8 ml-[320px]">
                     {/* Menu Header */}
                     <div className="mb-8">
@@ -111,28 +170,39 @@ const Menu = () => {
                         <p className="text-gray-600">Nikmati berbagai menu kami yang banyak variannya</p>
                     </div>
 
-                    {/* Menu Grid - Changed to flex with wrap */}
+                    {/* Menu Grid */}
                     <div className="flex flex-wrap gap-4">
-                        {/* Menu Item - Added fixed width */}
-                        {[...Array(8)].map((_, index) => (
-                            <Link to="/menu/item">
-                            <div key={index} className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                                <div className="relative">
-                                    <div className="h-[300px] w-full bg-Alfredo bg-cover bg-center" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                    
-                                    <div className="absolute bottom-0 text-left left-0 p-4 text-white">
-                                        <h3 className="font-semibold text-xl">Alfredo Pasta</h3>
-                                        <p className="pl-1 text-white">Rp 21.000</p>
-                                    </div>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : filteredProducts.length === 0 ? (
+                            <p>No products found.</p>
+                        ) : (
+                            filteredProducts.map((product) => (
+                                <Link to={`/menu/item/${product.id}`} key={product.id}>
+                                    <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
+                                        <div className="relative">
+                                            <div 
+                                                className="h-[300px] w-full bg-cover bg-center" 
+                                                style={{ backgroundImage: `url(${product.imageUrl})` }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                            
+                                            <div className="absolute bottom-0 text-left left-0 p-4 text-white">
+                                                <h3 className="font-semibold text-xl">{product.title}</h3>
+                                                <p className="pl-1 text-white">Rp {product.price.toLocaleString()}</p>
+                                            </div>
 
-                                    <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                        <span className="text-xl pb-1">+</span>
-                                    </button>
-                                </div>
-                            </div>
-                            </Link>
-                        ))}
+                                            <button 
+                                                onClick={(e) => handleAddToCart(e, product)}
+                                                className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors"
+                                            >
+                                                <span className="text-xl pb-1">+</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

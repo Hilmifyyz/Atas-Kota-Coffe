@@ -1,188 +1,197 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { collection, query, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebase";
+import { FaStar } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 const HomeFirst = () => {
+    const [bestSellers, setBestSellers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [addingToCart, setAddingToCart] = useState(null);
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchBestSellers = async () => {
+            try {
+                // Fetch all products
+                const productsQuery = query(collection(db, "products"));
+                const productsSnapshot = await getDocs(productsQuery);
+                const products = productsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Fetch all ratings
+                const ratingsQuery = query(collection(db, "ratings"));
+                const ratingsSnapshot = await getDocs(ratingsQuery);
+                const ratings = ratingsSnapshot.docs.map(doc => doc.data());
+
+                // Calculate average rating for each product
+                const productsWithRatings = products.map(product => {
+                    const productRatings = ratings.filter(rating => rating.productId === product.id);
+                    const averageRating = productRatings.length > 0
+                        ? productRatings.reduce((acc, curr) => acc + curr.rating, 0) / productRatings.length
+                        : 0;
+                    return {
+                        ...product,
+                        averageRating,
+                        ratingCount: productRatings.length
+                    };
+                });
+
+                // Sort products by average rating and get top 7
+                const sortedProducts = productsWithRatings
+                    .sort((a, b) => {
+                        // First sort by average rating
+                        if (b.averageRating !== a.averageRating) {
+                            return b.averageRating - a.averageRating;
+                        }
+                        // If ratings are equal, sort by number of ratings
+                        return b.ratingCount - a.ratingCount;
+                    })
+                    .slice(0, 7);
+
+                setBestSellers(sortedProducts);
+            } catch (error) {
+                console.error("Error fetching best sellers:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBestSellers();
+    }, []);
+
+    const handleAddToCart = async (e, product) => {
+        e.preventDefault(); // Prevent navigation when clicking the add button
+        e.stopPropagation(); // Prevent event bubbling
+
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setAddingToCart(product.id);
+            await addDoc(collection(db, "cart"), {
+                userId: user.uid,
+                productId: product.id,
+                title: product.title,
+                price: product.price,
+                quantity: 1,
+                imageUrl: product.imageUrl,
+                createdAt: serverTimestamp()
+            });
+            alert('Product added to cart!');
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+            alert("Failed to add item to cart. Please try again.");
+        } finally {
+            setAddingToCart(null);
+        }
+    };
+
+    const handleProductClick = (productId) => {
+        navigate(`/menu/${productId}`);
+    };
+
     return (
         <section id="Top" className="w-full min-h-screen bg-brownpage top-0 m-0 p-0">
             {/* Hero Section */}
-            <div className="pt-24 px-4 md:px-12 lg:px-24 ">
+            <div className="pt-24 px-4 md:px-12 lg:px-24">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                     {/* Left Side - Icon and Description */}
                     <div className="flex-1 flex flex-col items-start space-y-8 max-w-lg xl:ml-24 2xl:ml-60">
                         {/* Large Icon/Logo */}
-                        <div className="w-full flex justify-center ">
+                        <div className="w-full flex justify-center">
                             <div className="h-48 w-96 2xl:h-64 2xl:w-[28rem] bg-Logo bg-contain bg-no-repeat bg-center"/>
                         </div>
                         
                         {/* Description */}
                         <p className="text-gray-600 font-sans font-[400] text-lg md:text-xl">
-                        Hai, Selamat datang di atas kota
-                        selamat menikmati beberapa hidangan kami
+                            Hai, Selamat datang di atas kota
+                            selamat menikmati beberapa hidangan kami
                         </p>
                     </div>
 
                     {/* Right Side - Coffee Image */}
-                    <div className="flex-1 flex justify-center items-center h-[525px] ">
+                    <div className="flex-1 flex justify-center items-center h-[525px]">
                         <div className="h-[340px] w-[400px] xl:h-[442px] xl:w-[520px] 2xl:h-[510px] 2xl:w-[600px] bg-Coffee bg-cover bg-center bg-no-repeat rounded-2xl"/>
                     </div>
                 </div>
             </div>
-            {/* Horizontal scroll section / menu items */}
-            <div className="px-4 md:px-12 lg:px-24 ">
+
+            {/* Best Sellers Section */}
+            <div className="px-4 md:px-12 lg:px-24">
                 {/* Title */}
                 <div className="text-left mb-6">
-                    <h2 className="text-3xl font-sans font-[700] italic ">Best Seller</h2>
+                    <h2 className="text-3xl font-sans font-[700] italic">Best Seller</h2>
+                    <p className="text-gray-600 text-sm mt-1">Based on customer ratings</p>
                 </div>
 
                 {/* Scrollable Container */}
-                <div className="flex overflow-x-auto space-x-6 pb-6 scrollbar-hide ">
-                    {/* Menu Item 1 */}
-                    <Link to="/menu/caffe-latte" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                <div className="h-[300px] w-full bg-CaffeLatte bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Caffe Latte</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
-
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
+                <div className="flex overflow-x-auto space-x-6 pb-6 scrollbar-hide">
+                    {loading ? (
+                        <div className="w-full flex justify-center items-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                         </div>
-                    </Link>
-                    {/* Menu Item 2 */}
-                    <Link to="/menu/alfredo-pasta" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-Alfredo bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Alfredo Pasta</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
-
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
+                    ) : bestSellers.length === 0 ? (
+                        <div className="w-full text-center py-8 text-gray-500">
+                            No products found
                         </div>
-                    </Link>
-                    {/* Menu Item 3 */}
-                    <Link to="/menu/chicken-pasta" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-ChickenPasta bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Chicken Pasta</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
+                    ) : (
+                        bestSellers.map((product) => (
+                            <div 
+                                key={product.id} 
+                                className="flex-none cursor-pointer"
+                                onClick={() => handleProductClick(product.id)}
+                            >
+                                <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                    <div className="relative">
+                                        <div 
+                                            className="h-[300px] w-full bg-cover bg-center" 
+                                            style={{ backgroundImage: `url(${product.imageUrl})` }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                        
+                                        {/* Rating Badge */}
+                                        <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center">
+                                            <FaStar className="text-yellow-400 w-4 h-4" />
+                                            <span className="ml-1 text-sm font-medium">
+                                                {product.averageRating.toFixed(1)}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="absolute bottom-0 text-left left-0 p-4 text-white">
+                                            <h3 className="font-semibold text-xl">{product.title}</h3>
+                                            <p className="pl-1 text-white">Rp {product.price.toLocaleString()}</p>
+                                            <div className="flex items-center mt-1 text-sm text-white/80">
+                                                <span>{product.ratingCount} ratings</span>
+                                            </div>
+                                        </div>
 
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
-                        </div>
-                    </Link>
-                    {/* Menu Item 4 */}
-                    <Link to="/menu/item" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-RotiBakar bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Roti Bakar</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
+                                        <button 
+                                            onClick={(e) => handleAddToCart(e, product)}
+                                            disabled={addingToCart === product.id}
+                                            className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                        >
+                                            {addingToCart === product.id ? (
+                                                <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <span className="text-xl pb-1">+</span>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
                             </div>
-                        </div>
-                    </Link>
-                    {/* Menu Item 5 */}
-                    <Link to="/menu/espresso" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-Espresso bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Espresso</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
-
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
-                        </div>
-                    </Link>
-                    {/* Menu Item 6 */}
-                    <Link to="/menu/espresso" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-Espresso bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Espresso</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
-
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
-                        </div>
-                    </Link>
-                    {/* Menu Item 7 */}
-                    <Link to="/menu/espresso" className="flex-none">
-                        <div className="w-[230px] bg-white rounded-2xl shadow-md relative overflow-hidden">
-                            <div className="relative">
-                                {/* Image with gradient overlay */}
-                                <div className="h-[300px] w-full bg-Espresso bg-cover bg-center" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                
-                                {/* Text overlay */}
-                                <div className="absolute bottom-0 text-left left-0 p-4 text-white ">
-                                    <h3 className="font-semibold text-xl">Espresso</h3>
-                                    <p className="pl-1 text-white">Rp 21.000</p>
-                                </div>
-
-                                {/* Plus button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                    <span className="text-xl pb-1">+</span>
-                                </button>
-                            </div>
-                        </div>
-                    </Link>
+                        ))
+                    )}
                 </div>
             </div>
         </section>
-    )
-}
+    );
+};
 
-export default HomeFirst;
+export default HomeFirst; 

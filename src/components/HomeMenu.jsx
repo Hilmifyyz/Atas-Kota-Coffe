@@ -1,8 +1,68 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getProducts } from "../firebase";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const HomeMenu = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [showToast, setShowToast] = useState(false);
+    const { addToCart } = useCart();
+    const { user } = useAuth();
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const productsData = await getProducts();
+                setProducts(productsData);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const handleAddToCart = async (e, product) => {
+        e.preventDefault(); // Prevent navigation to product details
+        
+        if (!user) {
+            window.location.href = '/login';
+            return;
+        }
+
+        await addToCart(product);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+    };
+
+    const handleCategoryChange = (category) => {
+        setSelectedCategory(category === selectedCategory ? null : category);
+    };
+
+    // Filter products and limit to 8 items
+    const filteredProducts = products
+        .filter(product => {
+            const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = !selectedCategory || product.category === selectedCategory;
+            return matchesSearch && matchesCategory;
+        })
+        .slice(0, 8); // Only show first 8 products
+
     return (
         <section id="menu" className="w-screen min-h-[75vh] border-t-2 border-[#D9D9D9] bg-brownpage">
+            {/* Success Toast */}
+            {showToast && (
+                <div className="fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300">
+                    Item added to cart!
+                </div>
+            )}
+
             <div className="flex flex-row">
                 <div className="flex flex-col p-6 w-[350px] min-h-[75vh] border-r-2 border-[#D9D9D9]">
                     <div className="mb-8">
@@ -14,28 +74,39 @@ const HomeMenu = () => {
                             <input 
                                 type="text" 
                                 placeholder="Cari Produk"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full px-4 py-2 border rounded-lg"
                             />
                             <span className="absolute right-3 w-5 h-5 bg-SearchIcon bg-cover top-2.5"></span>
                         </div>
                     </div>
-                <details className="cursor-pointer">
-                      <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
+                    <details className="cursor-pointer">
+                        <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
                             <span className="w-5 h-5 mr-2 bg-CoffeeIcon bg-cover bg-center"></span>
-                                Coffee
-                            </summary>
-                            <div className="pl-9 py-2 text-left space-y-2">
-                                <Link to="/menu/">
-                                <p className="hover:bg-gray-100 p-1">Latte</p>
-                                </Link>
-                                <Link to="/menu/">
-                                <p className="hover:bg-gray-100 p-1">Arabica</p>
-                                </Link>
-                                <Link to="/menu/">
-                                <p className="hover:bg-gray-100 p-1">Espresso</p>
-                                </Link>
-                            </div>
-                        </details>
+                            Coffee
+                        </summary>
+                        <div className="pl-9 py-2 text-left space-y-2">
+                            <p 
+                                onClick={() => handleCategoryChange('Latte')} 
+                                className="hover:bg-gray-100 p-1 cursor-pointer"
+                            >
+                                Latte
+                            </p>
+                            <p 
+                                onClick={() => handleCategoryChange('Arabica')} 
+                                className="hover:bg-gray-100 p-1 cursor-pointer"
+                            >
+                                Arabica
+                            </p>
+                            <p 
+                                onClick={() => handleCategoryChange('Espresso')} 
+                                className="hover:bg-gray-100 p-1 cursor-pointer"
+                            >
+                                Espresso
+                            </p>
+                        </div>
+                    </details>
                 </div>
                 <div className="w-full min-h-full pt-8">
                     <div className="mb-8">
@@ -43,26 +114,37 @@ const HomeMenu = () => {
                         <p className="font-sans font-[500] text-[#716C6C]">Nikmati berbagai menu kami yang banyak variannya</p>
                     </div>
                     <div className="flex flex-wrap gap-4 px-6">
-                        {/* Menu Item - Added fixed width */}
-                        {[...Array(8)].map((_, index) => (
-                            <Link to="/menu/item">
-                            <div key={index} className="w-[230px] bg-white rounded-2xl shadow-2xl relative overflow-hidden">
-                                <div className="relative">
-                                    <div className="h-[300px] w-full bg-Alfredo bg-cover bg-center" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                    
-                                    <div className="absolute bottom-0 text-left left-0 p-4 text-white">
-                                        <h3 className="font-semibold text-xl">Alfredo Pasta</h3>
-                                        <p className="pl-1 text-white">Rp 21.000</p>
-                                    </div>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : filteredProducts.length === 0 ? (
+                            <p>No products found.</p>
+                        ) : (
+                            filteredProducts.map((product) => (
+                                <Link to={`/menu/item/${product.id}`} key={product.id}>
+                                    <div className="w-[230px] bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+                                        <div className="relative">
+                                            <div 
+                                                className="h-[300px] w-full bg-cover bg-center" 
+                                                style={{ backgroundImage: `url(${product.imageUrl})` }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                            
+                                            <div className="absolute bottom-0 text-left left-0 p-4 text-white">
+                                                <h3 className="font-semibold text-xl">{product.title}</h3>
+                                                <p className="pl-1 text-white">Rp {product.price.toLocaleString()}</p>
+                                            </div>
 
-                                    <button className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md">
-                                        <span className="text-xl pb-1">+</span>
-                                    </button>
-                                </div>
-                            </div>
-                            </Link>
-                        ))}
+                                            <button 
+                                                onClick={(e) => handleAddToCart(e, product)}
+                                                className="absolute bottom-4 right-4 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors"
+                                            >
+                                                <span className="text-xl pb-1">+</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))
+                        )}
                     </div>
                     <Link to="/menu" className="flex justify-center mt-4">
                         <div className="p-4 bg-[#E6D5B7] m-6 min-w-64 rounded-[26px]">
@@ -72,7 +154,7 @@ const HomeMenu = () => {
                 </div>
             </div>
         </section>
-    )
-}
+    );
+};
 
 export default HomeMenu;

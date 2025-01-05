@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from './components/Navbar'
 import Menu from './pages/Menu';
 import Location from './components/Location';
@@ -17,49 +17,77 @@ import Transaction from './pages/admin/Transaction';
 import History from './pages/admin/History';
 import Orders from './pages/admin/Orders';
 import AddProduct from './pages/admin/AddProduct';
+import EditProduct from './pages/admin/EditProduct';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import CompletePayment from './pages/CompletePayment';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAdmin } = useAuth();
+  
+  if (!isAdmin) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
+};
 
 function App() {
-
   return (
-    <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/admin/product" element={<Admin />} />
-            <Route path="/admin/transaction" element={<Transaction/>}/>
-            <Route path="/admin/history" element={<History/>}/>
-            <Route path="/admin/orders" element={<Orders/>}/>
-            <Route path="/admin/product/add" element={<AddProduct/>}></Route>
-            
-            <Route path="/*" element={
-              <>
-                <Navbar />
-                <div className="Content">
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              {/* Admin Routes */}
+              <Route path="/admin/*" element={
+                <ProtectedRoute>
                   <Routes>
-                    <Route path='/' element={
-                      <div className="min-h-screen absolute overflow-hidden overflow-x-hidden top-0 left-0 right-0">
-                        <HomeFirst/>
-                        <HomeMenu/>
-                        <Location/>
-                        <HomeGallery/>
-                        <Footer/> 
-                      </div>
-                    }/>
-                    <Route path='/menu' element={<Menu/>} />
-                    <Route path='/menu/item' element={<Item/>} />
-                    <Route path='/cart' element={<Keranjang/>} />
-                    <Route path='/login' element={<Login/>} />
-                    <Route path='/checkout' element={<CheckOut/>} />
-                    <Route path='/detail' element={<Detail/>} />
+                    <Route path="/product" element={<Admin />} />
+                    <Route path="/transaction" element={<Transaction/>} />
+                    <Route path="/history" element={<History/>} />
+                    <Route path="/orders" element={<Orders/>} />
+                    <Route path="/product/add" element={<AddProduct/>} />
+                    <Route path="/product/edit/:id" element={<EditProduct/>} />
                   </Routes>
-                </div>
-              </>
-            } />
-          </Routes>
-        </div>
-    </Router>
+                </ProtectedRoute>
+              } />
+              
+              {/* Public Routes */}
+              <Route path="/*" element={
+                <>
+                  <Navbar />
+                  <div className="Content">
+                    <Routes>
+                      <Route path='/' element={
+                        <div className="min-h-screen absolute overflow-hidden overflow-x-hidden top-0 left-0 right-0">
+                          <HomeFirst/>
+                          <HomeMenu/>
+                          <Location/>
+                          <HomeGallery/>
+                          <Footer/> 
+                        </div>
+                      }/>
+                      <Route path='/menu' element={<Menu/>} />
+                      <Route path='/menu/item/:id' element={<Item/>} />
+                      <Route path='/cart' element={<Keranjang/>} />
+                      <Route path='/login' element={<Login/>} />
+                      <Route path='/checkout' element={<CheckOut/>} />
+                      <Route path='/detail' element={<Detail/>} />
+                      <Route path='/complete-payment' element={<CompletePayment />} />
+                    </Routes>
+                  </div>
+                </>
+              } />
+            </Routes>
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   )
 }
 
-export default App
+export default App;
 
 // w-screen min-h-screen absolute top-0 left-0 right-0
