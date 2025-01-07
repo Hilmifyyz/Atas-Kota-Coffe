@@ -3,7 +3,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { BarsArrowDownIcon, TrashIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import { useState, useEffect } from "react";
 import { getProducts, deleteProduct } from "../../firebase";
-import { MdDashboard, MdShoppingCart, MdHistory, MdInventory } from "react-icons/md";
+import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdPayment } from "react-icons/md";
 
 const Admin = () => {
     const [products, setProducts] = useState([]);
@@ -71,47 +71,50 @@ const Admin = () => {
                 <BarsArrowDownIcon className="w-6 h-6" />
             </button>
 
-            {/* Sidebar - Works on both mobile and desktop */}
-            <div className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r-2 border-[#D9D9D9] transform transition-transform duration-200 ease-in-out ${
-                isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-            } z-40`}>
-                <div className="flex flex-col h-full">
-                    <h1 className="text-center font-sans font-[700] text-[24px] mt-10">Dashboard Admin</h1>
-                    
-                    <nav className="flex-1 mt-10">
-                        <Link 
-                            to="/admin/product" 
-                            className="flex items-center px-4 py-2 mx-4 rounded-xl bg-[#EBEBEB] hover:bg-[#d9d9d9] transition-colors"
-                        >
-                            <MdInventory className="w-6 h-6 mr-2" />
-                            <span className="font-sans font-[600] text-xl">Products</span>
-                        </Link>
+            {/* Desktop Sidebar */}
+            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transform transition-transform duration-200 ease-in-out fixed md:relative w-64 h-screen bg-white border-r-2 border-[#D9D9D9] z-40 md:w-1/6 hidden md:block`}>
+                <h1 className="text-center font-sans font-[700] text-[24px] mt-10">Dashboard Admin</h1>
+                <nav className="flex-1 mt-10">
+                    <Link 
+                        to="/admin/product" 
+                        className="flex items-center px-4 py-2 mx-4 rounded-xl bg-[#EBEBEB] hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdInventory className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Products</span>
+                    </Link>
 
-                        <Link 
-                            to="/admin/orders" 
-                            className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                        >
-                            <MdShoppingCart className="w-6 h-6 mr-2" />
-                            <span className="font-sans font-[600] text-xl">Orders</span>
-                        </Link>
+                    <Link 
+                        to="/admin/orders" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdShoppingCart className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Orders</span>
+                    </Link>
 
-                        <Link 
-                            to="/admin/transaction" 
-                            className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                        >
-                            <MdDashboard className="w-6 h-6 mr-2" />
-                            <span className="font-sans font-[600] text-xl">Transaction</span>
-                        </Link>
+                    <Link 
+                        to="/admin/order-confirmation" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdPayment className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Payment Confirmation</span>
+                    </Link>
 
-                        <Link 
-                            to="/admin/history" 
-                            className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                        >
-                            <MdHistory className="w-6 h-6 mr-2" />
-                            <span className="font-sans font-[600] text-xl">Riwayat</span>
-                        </Link>
-                    </nav>
-                </div>
+                    <Link 
+                        to="/admin/transaction" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdDashboard className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Transaction</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/history" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdHistory className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Riwayat</span>
+                    </Link>
+                </nav>
             </div>
 
             {/* Overlay for mobile */}

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { CalendarIcon, ArrowTrendingUpIcon, MagnifyingGlassIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Select } from '@headlessui/react'
-import { MdDashboard, MdShoppingCart, MdHistory, MdInventory } from "react-icons/md";
+import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdPayment } from "react-icons/md";
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -208,6 +208,14 @@ const Orders = () => {
                     >
                         <MdShoppingCart className="w-6 h-6 mr-2" />
                         <span className="font-sans font-[600] text-xl">Orders</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/order-confirmation" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdPayment className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Payment Confirmation</span>
                     </Link>
 
                     <Link 

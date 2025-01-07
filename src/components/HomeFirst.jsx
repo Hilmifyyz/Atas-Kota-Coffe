@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaStar } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const HomeFirst = () => {
     const [bestSellers, setBestSellers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [addingToCart, setAddingToCart] = useState(null);
     const { user } = useAuth();
+    const { addToCart } = useCart();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -65,8 +67,8 @@ const HomeFirst = () => {
     }, []);
 
     const handleAddToCart = async (e, product) => {
-        e.preventDefault(); // Prevent navigation when clicking the add button
-        e.stopPropagation(); // Prevent event bubbling
+        e.preventDefault();
+        e.stopPropagation();
 
         if (!user) {
             navigate('/login');
@@ -75,15 +77,7 @@ const HomeFirst = () => {
 
         try {
             setAddingToCart(product.id);
-            await addDoc(collection(db, "cart"), {
-                userId: user.uid,
-                productId: product.id,
-                title: product.title,
-                price: product.price,
-                quantity: 1,
-                imageUrl: product.imageUrl,
-                createdAt: serverTimestamp()
-            });
+            await addToCart(product, 1);
             alert('Product added to cart!');
         } catch (error) {
             console.error("Error adding to cart:", error);
@@ -94,7 +88,11 @@ const HomeFirst = () => {
     };
 
     const handleProductClick = (productId) => {
-        navigate(`/menu/${productId}`);
+        if (productId) {
+            navigate(`/menu/item/${productId}`);
+        } else {
+            console.error("Product ID is undefined");
+        }
     };
 
     return (

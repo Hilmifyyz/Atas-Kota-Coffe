@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { addProduct } from "../../firebase";
-import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdCloudUpload } from "react-icons/md";
+import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdCloudUpload, MdPayment } from "react-icons/md";
 
 const AddProduct = () => {
     const navigate = useNavigate();
@@ -138,32 +138,47 @@ const AddProduct = () => {
             {/* Desktop Sidebar */}
             <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transform transition-transform duration-200 ease-in-out fixed md:relative w-64 h-screen bg-white border-r-2 border-[#D9D9D9] z-40 md:w-1/6 hidden md:block`}>
                 <h1 className="text-center font-sans font-[700] text-[24px] mt-10">Dashboard Admin</h1>
-                <div className="grid grid-cols-1 grid-rows-4 gap-4 mt-10">
-                    <div>
-                        <Link to="/admin/product" className="flex items-center justify-center bg-[#EBEBEB] hover:bg-[#d9d9d9] rounded-xl mx-4 py-2">
-                            <MdInventory className="w-6 h-6 mr-2" />
-                            <h1 className="font-sans font-[600] text-xl">Products</h1>
-                        </Link>
-                    </div>
-                    <div className="row-start-2">
-                        <Link to="/admin/orders" className="flex items-center justify-center hover:bg-[#d9d9d9] rounded-xl mx-4 py-2">
-                            <MdShoppingCart className="w-6 h-6 mr-2" />
-                            <h1 className="font-sans font-[600] text-xl">Orders</h1>
-                        </Link>
-                    </div>
-                    <div className="row-start-3">
-                        <Link to="/admin/transaction" className="flex items-center justify-center hover:bg-[#d9d9d9] rounded-xl mx-4 py-2">
-                            <MdDashboard className="w-6 h-6 mr-2" />
-                            <h1 className="font-sans font-[600] text-xl">Transaction</h1>
-                        </Link>
-                    </div>
-                    <div className="row-start-4">
-                        <Link to="/admin/history" className="flex items-center justify-center hover:bg-[#d9d9d9] rounded-xl mx-4 py-2">
-                            <MdHistory className="w-6 h-6 mr-2" />
-                            <h1 className="font-sans font-[600] text-xl">Riwayat</h1>
-                        </Link>
-                    </div>
-                </div>
+                <nav className="flex-1 mt-10">
+                    <Link 
+                        to="/admin/product" 
+                        className="flex items-center px-4 py-2 mx-4 rounded-xl bg-[#EBEBEB] hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdInventory className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Products</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/orders" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdShoppingCart className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Orders</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/order-confirmation" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdPayment className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Payment Confirmation</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/transaction" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdDashboard className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Transaction</span>
+                    </Link>
+
+                    <Link 
+                        to="/admin/history" 
+                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                    >
+                        <MdHistory className="w-6 h-6 mr-2" />
+                        <span className="font-sans font-[600] text-xl">Riwayat</span>
+                    </Link>
+                </nav>
             </div>
 
             {/* Mobile Bottom Navigation */}

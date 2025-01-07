@@ -80,11 +80,25 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Orders collection rules (for future use)
+    // Orders collection rules
     match /orders/{orderId} {
-      // Users can read their own orders, admins can read all
-      allow read: if isAuthenticated() && 
-        (request.auth.uid == resource.data.userId || isAdmin());
+      // Anyone can read their own orders by orderNumber, admins can read all
+      allow read: if isAdmin() || 
+        (resource.data.orderNumber == request.query.orderNumber);
+      
+      // Anyone can create orders with valid data
+      allow create: if request.resource.data.keys().hasAll(['items', 'total', 'status', 'createdAt', 'customerName', 'seatNumber', 'orderNumber', 'paymentMethod']) &&
+        request.resource.data.items is list &&
+        request.resource.data.total is number &&
+        request.resource.data.total > 0 &&
+        request.resource.data.status in ['pending', 'paid', 'failed'] &&
+        request.resource.data.customerName is string &&
+        request.resource.data.customerName.size() > 0 &&
+        request.resource.data.seatNumber is string &&
+        request.resource.data.seatNumber.size() > 0 &&
+        request.resource.data.orderNumber is string &&
+        request.resource.data.orderNumber.size() > 0 &&
+        request.resource.data.paymentMethod in ['cash', 'e-money'];
       
       // Users can create orders, only admins can update/delete
       allow create: if isAuthenticated() && 

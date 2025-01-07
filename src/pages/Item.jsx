@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, collection, addDoc, serverTimestamp, updateDoc, getDocs, query, where, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, where, arrayUnion, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { FaStar } from "react-icons/fa";
 
 const Item = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { addToCart } = useCart();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
@@ -136,7 +138,7 @@ const Item = () => {
         setQuantity(value < 1 ? 1 : value);
     };
 
-    const addToCart = async () => {
+    const handleAddToCart = async () => {
         if (!user) {
             navigate('/login');
             return;
@@ -144,15 +146,7 @@ const Item = () => {
 
         try {
             setAddingToCart(true);
-            await addDoc(collection(db, "cart"), {
-                userId: user.uid,
-                productId: product.id,
-                title: product.title,
-                price: product.price,
-                quantity: quantity,
-                imageUrl: product.imageUrl,
-                createdAt: serverTimestamp()
-            });
+            await addToCart(product, quantity);
             navigate('/cart');
         } catch (error) {
             console.error("Error adding to cart:", error);
@@ -265,7 +259,7 @@ const Item = () => {
 
                     <div className="flex gap-4">
                         <button 
-                            onClick={addToCart}
+                            onClick={handleAddToCart}
                             disabled={addingToCart}
                             className="flex-1 px-4 md:px-6 py-3 border-2 hover:bg-[#ccb796] hover:text-white hover:border-[#ccb796] border-[#b69d74] text-[#b69d74] rounded-lg font-semibold text-sm md:text-base"
                         >

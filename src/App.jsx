@@ -18,9 +18,12 @@ import History from './pages/admin/History';
 import Orders from './pages/admin/Orders';
 import AddProduct from './pages/admin/AddProduct';
 import EditProduct from './pages/admin/EditProduct';
+import OrderConfirmation from './pages/admin/OrderConfirmation';
+import WaitingConfirmation from './pages/WaitingConfirmation';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import CompletePayment from './pages/CompletePayment';
+import PropTypes from 'prop-types';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -31,6 +34,10 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return children;
+};
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 function App() {
@@ -48,6 +55,7 @@ function App() {
                     <Route path="/transaction" element={<Transaction/>} />
                     <Route path="/history" element={<History/>} />
                     <Route path="/orders" element={<Orders/>} />
+                    <Route path="/order-confirmation" element={<OrderConfirmation/>} />
                     <Route path="/product/add" element={<AddProduct/>} />
                     <Route path="/product/edit/:id" element={<EditProduct/>} />
                   </Routes>
@@ -76,6 +84,7 @@ function App() {
                       <Route path='/checkout' element={<CheckOut/>} />
                       <Route path='/detail' element={<Detail/>} />
                       <Route path='/complete-payment' element={<CompletePayment />} />
+                      <Route path='/waiting-confirmation' element={<WaitingConfirmation />} />
                     </Routes>
                   </div>
                 </>

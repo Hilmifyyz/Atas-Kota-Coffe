@@ -42,7 +42,7 @@ export const CartProvider = ({ children }) => {
         fetchCartItems();
     }, [user]);
 
-    const addToCart = async (product) => {
+    const addToCart = async (product, quantity = 1) => {
         if (!user) {
             alert("Please login to add items to cart");
             return;
@@ -61,14 +61,16 @@ export const CartProvider = ({ children }) => {
                 // Update quantity if product exists
                 const cartItem = querySnapshot.docs[0];
                 const currentQuantity = cartItem.data().quantity;
+                const newQuantity = currentQuantity + quantity;
+                
                 await updateDoc(doc(db, "cart", cartItem.id), {
-                    quantity: currentQuantity + 1
+                    quantity: newQuantity
                 });
 
                 setCartItems(prevItems =>
                     prevItems.map(item =>
                         item.id === cartItem.id
-                            ? { ...item, quantity: currentQuantity + 1 }
+                            ? { ...item, quantity: newQuantity }
                             : item
                     )
                 );
@@ -80,7 +82,7 @@ export const CartProvider = ({ children }) => {
                     title: product.title,
                     price: product.price,
                     imageUrl: product.imageUrl,
-                    quantity: 1,
+                    quantity: quantity,
                     category: product.category,
                     description: product.description
                 };

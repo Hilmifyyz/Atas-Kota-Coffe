@@ -41,10 +41,6 @@ const HomeMenu = () => {
         setTimeout(() => setShowToast(false), 2000);
     };
 
-    const handleCategoryChange = (category) => {
-        setSelectedCategory(category === selectedCategory ? null : category);
-    };
-
     // Filter products and limit to 8 items
     const filteredProducts = products
         .filter(product => {
@@ -81,32 +77,95 @@ const HomeMenu = () => {
                             <span className="absolute right-3 w-5 h-5 bg-SearchIcon bg-cover top-2.5"></span>
                         </div>
                     </div>
-                    <details className="cursor-pointer">
-                        <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded">
-                            <span className="w-5 h-5 mr-2 bg-CoffeeIcon bg-cover bg-center"></span>
-                            Coffee
-                        </summary>
-                        <div className="pl-9 py-2 text-left space-y-2">
-                            <p 
-                                onClick={() => handleCategoryChange('Latte')} 
-                                className="hover:bg-gray-100 p-1 cursor-pointer"
-                            >
-                                Latte
-                            </p>
-                            <p 
-                                onClick={() => handleCategoryChange('Arabica')} 
-                                className="hover:bg-gray-100 p-1 cursor-pointer"
-                            >
-                                Arabica
-                            </p>
-                            <p 
-                                onClick={() => handleCategoryChange('Espresso')} 
-                                className="hover:bg-gray-100 p-1 cursor-pointer"
-                            >
-                                Espresso
-                            </p>
-                        </div>
-                    </details>
+                    <div className="space-y-2">
+                        <details className="cursor-pointer">
+                            <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setSelectedCategory(selectedCategory === 'hot-coffee' ? null : 'hot-coffee');
+                                    }}>
+                                <span className="w-5 h-5 mr-2 bg-CoffeeIcon bg-cover bg-center"></span>
+                                Coffee
+                            </summary>
+                            <div className="pl-9 py-2 text-left space-y-2">
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Latte</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </Link>
+                            </div>
+                        </details>
+                        
+                        <details className="cursor-pointer">
+                            <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setSelectedCategory(selectedCategory === 'cake' ? null : 'cake');
+                                    }}>
+                                <span className="w-5 h-5 mr-2 bg-CakeIcon bg-cover bg-center"></span>
+                                Cake
+                            </summary>
+                            <div className="pl-10 py-2 text-left space-y-2">
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Latte</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </Link>
+                            </div>
+                        </details>
+
+                        <details className="cursor-pointer">
+                            <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setSelectedCategory(selectedCategory === 'food' ? null : 'food');
+                                    }}>
+                                <span className="w-5 h-5 mr-2 bg-FoodIcon bg-cover bg-center"></span>
+                                Food
+                            </summary>
+                            <div className="pl-10 py-2 text-left space-y-2">
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Latte</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                </Link>
+                                <Link to="/menu/">
+                                <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </Link>
+                            </div>
+                        </details>
+
+                        <details className="cursor-pointer">
+                            <summary className="flex items-center p-2 bg-gray-100 hover:bg-gray-300 rounded"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setSelectedCategory(selectedCategory === 'drinks' ? null : 'drinks');
+                                    }}>
+                                <span className="w-5 h-5 mr-2 bg-DrinkIcon bg-cover bg-center"></span>
+                                Drinks
+                            </summary>
+                            <div className="pl-10 py-2 text-left space-y-2">
+                                <Link to="/menu/item">
+                                <p className="hover:bg-gray-100 p-1">Latte</p>
+                                </Link>
+                                <Link to="/menu/item">
+                                <p className="hover:bg-gray-100 p-1">Arabica</p>
+                                </Link>
+                                <Link to="/menu/item">
+                                <p className="hover:bg-gray-100 p-1">Espresso</p>
+                                </Link>
+                            </div>
+                        </details>
+                    </div>
                 </div>
                 <div className="w-full min-h-full pt-8">
                     <div className="mb-8">

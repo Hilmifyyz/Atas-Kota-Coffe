@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
-import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdPrint, MdSearch, MdFilterList, MdSort, MdPayment } from "react-icons/md";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { BarsArrowDownIcon } from '@heroicons/react/20/solid';
+import { MdDashboard, MdShoppingCart, MdHistory, MdInventory, MdPayment, MdPrint, MdAccessTime, MdPerson, MdChair, MdReceipt } from "react-icons/md";
 import PropTypes from 'prop-types';
-import { collection, query, orderBy, getDocs, where } from "firebase/firestore";
-import { db } from "../../firebase";
-import { Menu } from '@headlessui/react';
 
 const ReceiptCard = ({ orderNumber, items, total, customerName, seatNumber, paymentMethod, createdAt }) => {
     const receiptRef = useRef();
@@ -21,14 +22,13 @@ const ReceiptCard = ({ orderNumber, items, total, customerName, seatNumber, paym
     const handlePrint = async () => {
         try {
             setIsPrinting(true);
-        const printContent = receiptRef.current;
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             
             if (!printWindow) {
                 throw new Error('Please allow pop-ups for printing receipts.');
             }
 
-        printWindow.document.write(`
+            printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -206,7 +206,7 @@ const ReceiptCard = ({ orderNumber, items, total, customerName, seatNumber, paym
                 </html>
             `);
         
-        printWindow.document.close();
+            printWindow.document.close();
         } catch (error) {
             console.error('Print error:', error);
             alert(error.message || 'Failed to print receipt. Please try again.');
@@ -296,13 +296,13 @@ const ReceiptCard = ({ orderNumber, items, total, customerName, seatNumber, paym
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">Tax (0%)</span>
                         <span className="font-medium">Rp. 0</span>
-                            </div>
+                    </div>
                     <div className="flex justify-between items-center pt-2 border-t border-gray-100">
                         <span className="font-medium text-gray-800">Total Amount</span>
                         <span className="font-bold text-lg">
                             Rp. {total.toLocaleString()}
                         </span>
-                        </div>
+                    </div>
                 </div>
 
                 {/* Footer */}
@@ -330,13 +330,11 @@ const ReceiptCard = ({ orderNumber, items, total, customerName, seatNumber, paym
 
 ReceiptCard.propTypes = {
     orderNumber: PropTypes.string.isRequired,
-    items: PropTypes.arrayOf(
-        PropTypes.shape({
-            title: PropTypes.string.isRequired,
-            price: PropTypes.number.isRequired,
-            quantity: PropTypes.number.isRequired
-        })
-    ).isRequired,
+    items: PropTypes.arrayOf(PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        price: PropTypes.number.isRequired,
+        quantity: PropTypes.number.isRequired
+    })).isRequired,
     total: PropTypes.number.isRequired,
     customerName: PropTypes.string.isRequired,
     seatNumber: PropTypes.string.isRequired,
@@ -344,93 +342,65 @@ ReceiptCard.propTypes = {
     createdAt: PropTypes.string.isRequired
 };
 
-const History = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [orders, setOrders] = useState([]);
+const OrderConfirmation = () => {
+    const [pendingOrders, setPendingOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [dateRange, setDateRange] = useState({
-        startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
-        endDate: new Date()
-    });
-    const [sortBy, setSortBy] = useState("date_desc");
-    const [filterStatus, setFilterStatus] = useState("all");
+    const { user, isAdmin } = useAuth();
+    const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showReceipt, setShowReceipt] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
-        fetchOrders();
-    }, [dateRange, sortBy, filterStatus]);
-
-    const fetchOrders = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            let q = query(collection(db, "orders"));
-
-            // Add date range filter
-            q = query(q, 
-                where("createdAt", ">=", dateRange.startDate.toISOString()),
-                where("createdAt", "<=", dateRange.endDate.toISOString())
-            );
-
-            // Add status filter
-            if (filterStatus !== "all") {
-                q = query(q, where("status", "==", filterStatus));
-            }
-
-            // Add sorting
-            switch (sortBy) {
-                case "date_asc":
-                    q = query(q, orderBy("createdAt", "asc"));
-                    break;
-                case "total_desc":
-                    q = query(q, orderBy("total", "desc"));
-                    break;
-                case "total_asc":
-                    q = query(q, orderBy("total", "asc"));
-                    break;
-                default: // date_desc
-                    q = query(q, orderBy("createdAt", "desc"));
-            }
-
-            const querySnapshot = await getDocs(q);
-            const ordersData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: doc.data().createdAt || new Date().toISOString()
-            }));
-
-            setOrders(ordersData);
-        } catch (error) {
-            console.error("Error fetching orders:", error);
-            setError("Failed to load order history. Please try again.");
-        } finally {
-            setLoading(false);
+        if (!user || !isAdmin) {
+            navigate('/login');
+            return;
         }
-    };
 
-    // Enhanced search functionality
-    const filteredOrders = orders.filter(order => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-            order.id.toLowerCase().includes(searchLower) ||
-            order.customerName?.toLowerCase().includes(searchLower) ||
-            order.seatNumber?.toLowerCase().includes(searchLower) ||
-            order.paymentMethod?.toLowerCase().includes(searchLower) ||
-            order.items.some(item => 
-                item.title.toLowerCase().includes(searchLower) ||
-                item.price.toString().includes(searchLower)
-            )
-        );
-    });
+        const fetchPendingOrders = async () => {
+            try {
+                const q = query(
+                    collection(db, "orders"),
+                    where("status", "==", "pending"),
+                    where("paymentMethod", "==", "cash")
+                );
+                const querySnapshot = await getDocs(q);
+                const orders = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                setPendingOrders(orders);
+            } catch (error) {
+                console.error("Error fetching pending orders:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleDateRangeChange = (e) => {
-        const { name, value } = e.target;
-        setDateRange(prev => ({
-            ...prev,
-            [name]: new Date(value)
-        }));
+        fetchPendingOrders();
+    }, [user, isAdmin, navigate]);
+
+    const handleConfirmPayment = async (orderId) => {
+        try {
+            const orderRef = doc(db, "orders", orderId);
+            await updateDoc(orderRef, {
+                status: "paid",
+                paidAt: new Date().toISOString()
+            });
+
+            // Find the confirmed order and show its receipt
+            const confirmedOrder = pendingOrders.find(order => order.id === orderId);
+            setSelectedOrder(confirmedOrder);
+            setShowReceipt(true);
+
+            // Update local state
+            setPendingOrders(prevOrders => 
+                prevOrders.filter(order => order.id !== orderId)
+            );
+        } catch (error) {
+            console.error("Error confirming payment:", error);
+            alert("Failed to confirm payment. Please try again.");
+        }
     };
 
     return (
@@ -440,55 +410,60 @@ const History = () => {
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
             >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <BarsArrowDownIcon className="w-6 h-6" />
             </button>
 
-            {/* Desktop Sidebar */}
-            <div className={`${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transform transition-transform duration-200 ease-in-out fixed md:relative w-64 h-screen bg-white border-r-2 border-[#D9D9D9] z-40 md:w-1/6 hidden md:block`}>
-                <h1 className="text-center font-sans font-[700] text-[24px] mt-10">Dashboard Admin</h1>
-                <nav className="flex-1 mt-10">
-                    <Link 
-                        to="/admin/product" 
-                        className="flex items-center px-4 py-2 mx-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                    >
-                        <MdInventory className="w-6 h-6 mr-2" />
-                        <span className="font-sans font-[600] text-xl">Products</span>
-                    </Link>
+            {/* Sidebar */}
+            <div className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r-2 border-[#D9D9D9] transform transition-transform duration-200 ease-in-out ${
+                isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+            } z-40`}>
+                <div className="flex flex-col h-full">
+                    <div className="text-center py-8 border-b border-gray-200">
+                        <h1 className="font-sans font-[700] text-[24px]">Dashboard Admin</h1>
+                    </div>
+                    
+                    <nav className="flex-1 py-6 px-4 space-y-4">
+                        <Link 
+                            to="/admin/product" 
+                            className="flex items-center px-4 py-3 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                        >
+                            <MdInventory className="w-6 h-6 mr-3 text-gray-700" />
+                            <span className="font-sans font-[600] text-lg">Products</span>
+                        </Link>
 
-                    <Link 
-                        to="/admin/orders" 
-                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                    >
-                        <MdShoppingCart className="w-6 h-6 mr-2" />
-                        <span className="font-sans font-[600] text-xl">Orders</span>
-                    </Link>
+                        <Link 
+                            to="/admin/orders" 
+                            className="flex items-center px-4 py-3 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                        >
+                            <MdShoppingCart className="w-6 h-6 mr-3 text-gray-700" />
+                            <span className="font-sans font-[600] text-lg">Orders</span>
+                        </Link>
 
-                    <Link 
-                        to="/admin/order-confirmation" 
-                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                    >
-                        <MdPayment className="w-6 h-6 mr-2" />
-                        <span className="font-sans font-[600] text-xl">Payment Confirmation</span>
-                    </Link>
+                        <Link 
+                            to="/admin/order-confirmation" 
+                            className="flex items-center px-4 py-3 rounded-xl bg-[#E6D5B8] hover:bg-[#d4b87c] transition-colors"
+                        >
+                            <MdPayment className="w-6 h-6 mr-3 text-gray-700" />
+                            <span className="font-sans font-[600] text-lg">Payment Confirmation</span>
+                        </Link>
 
-                    <Link 
-                        to="/admin/transaction" 
-                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl hover:bg-[#d9d9d9] transition-colors"
-                    >
-                        <MdDashboard className="w-6 h-6 mr-2" />
-                        <span className="font-sans font-[600] text-xl">Transaction</span>
-                    </Link>
+                        <Link 
+                            to="/admin/transaction" 
+                            className="flex items-center px-4 py-3 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                        >
+                            <MdDashboard className="w-6 h-6 mr-3 text-gray-700" />
+                            <span className="font-sans font-[600] text-lg">Transaction</span>
+                        </Link>
 
-                    <Link 
-                        to="/admin/history" 
-                        className="flex items-center px-4 py-2 mx-4 mt-4 rounded-xl bg-[#EBEBEB] hover:bg-[#d9d9d9] transition-colors"
-                    >
-                        <MdHistory className="w-6 h-6 mr-2" />
-                        <span className="font-sans font-[600] text-xl">Riwayat</span>
-                    </Link>
-                </nav>
+                        <Link 
+                            to="/admin/history" 
+                            className="flex items-center px-4 py-3 rounded-xl hover:bg-[#d9d9d9] transition-colors"
+                        >
+                            <MdHistory className="w-6 h-6 mr-3 text-gray-700" />
+                            <span className="font-sans font-[600] text-lg">Riwayat</span>
+                        </Link>
+                    </nav>
+                </div>
             </div>
 
             {/* Overlay for mobile */}
@@ -500,7 +475,7 @@ const History = () => {
             )}
 
             {/* Mobile Bottom Navigation */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
                 <div className="flex justify-around items-center py-2">
                     <Link to="/admin/product" className="flex flex-col items-center p-2">
                         <MdInventory className="w-6 h-6 text-gray-600" />
@@ -521,196 +496,118 @@ const History = () => {
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 p-4 md:p-6 mt-16 md:mt-0 mb-16 md:mb-0">
-                {/* Header Section */}
-                <div className="mb-6">
-                    <h1 className="font-sans font-[600] text-2xl md:text-3xl">Order Receipt History</h1>
-                    <p className="font-sans text-gray-600 text-sm md:text-base mt-1">View and manage your order history</p>
-                </div>
-
-                {/* Filters and Search Section */}
-                <div className="mb-6 space-y-4">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        {/* Date Range Filters */}
-                        <div className="flex gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">From</label>
-                                <input
-                                    type="date"
-                                    name="startDate"
-                                    value={dateRange.startDate.toISOString().split('T')[0]}
-                                    onChange={handleDateRangeChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">To</label>
-                                <input
-                                    type="date"
-                                    name="endDate"
-                                    value={dateRange.endDate.toISOString().split('T')[0]}
-                                    onChange={handleDateRangeChange}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
-                            </div>
+            {/* Main Content */}
+            <div className="flex-1 p-4 md:p-8 mt-16 md:mt-0 mb-16 md:mb-0">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Payment Confirmation</h1>
+                            <p className="text-gray-600 mt-1">Manage pending cash payments</p>
                         </div>
-
-                        {/* Sort and Filter Dropdowns */}
-                        <div className="flex gap-4">
-                            <Menu as="div" className="relative">
-                                <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-                                    <MdSort />
-                                    Sort By
-                                </Menu.Button>
-                                <Menu.Items className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setSortBy('date_desc')}
-                                            >
-                                                Newest First
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setSortBy('date_asc')}
-                                            >
-                                                Oldest First
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setSortBy('total_desc')}
-                                            >
-                                                Highest Total
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setSortBy('total_asc')}
-                                            >
-                                                Lowest Total
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                </Menu.Items>
-                            </Menu>
-
-                            <Menu as="div" className="relative">
-                                <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:bg-gray-50">
-                                    <MdFilterList />
-                                    Filter
-                                </Menu.Button>
-                                <Menu.Items className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setFilterStatus('all')}
-                                            >
-                                                All Orders
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setFilterStatus('paid')}
-                                            >
-                                                Completed
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <button
-                                                className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2`}
-                                                onClick={() => setFilterStatus('pending')}
-                                            >
-                                                Pending
-                                            </button>
-                                        )}
-                                    </Menu.Item>
-                                </Menu.Items>
-                            </Menu>
+                        <div className="bg-white px-4 py-2 rounded-lg shadow-sm">
+                            <p className="text-sm text-gray-600">Pending Orders</p>
+                            <p className="text-2xl font-bold text-gray-800">{pendingOrders.length}</p>
                         </div>
                     </div>
-
-                    {/* Search Bar */}
-                    <div className="relative max-w-md">
-                        <input
-                            type="text"
-                            placeholder="Search by order ID, customer name, or seat number..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    </div>
-                </div>
-
-                {/* Receipts Grid */}
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="flex flex-col items-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-                            <p className="mt-4 text-lg text-gray-600">Loading orders...</p>
+                    
+                    {loading ? (
+                        <div className="bg-white rounded-xl p-8 text-center shadow-md">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Loading pending orders...</p>
                         </div>
-                    </div>
-                ) : error ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="flex flex-col items-center text-red-600">
-                            <p className="text-lg">{error}</p>
-                            <button 
-                                onClick={fetchOrders}
-                                className="mt-4 px-6 py-2 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+                    ) : showReceipt && selectedOrder ? (
+                        <div className="max-w-2xl mx-auto">
+                            <button
+                                onClick={() => setShowReceipt(false)}
+                                className="mb-6 px-4 py-2 text-gray-600 hover:text-gray-800 flex items-center gap-2 hover:bg-white rounded-lg transition-all"
                             >
-                                Try Again
+                                <span>←</span> Back to Pending Orders
                             </button>
-                        </div>
-                    </div>
-                ) : filteredOrders.length === 0 ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div className="flex flex-col items-center text-gray-600">
-                            <p className="text-lg">No orders found</p>
-                            {searchTerm && (
-                                <p className="mt-2 text-sm">
-                                    Try adjusting your search criteria or filters
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredOrders.map((order) => (
                             <ReceiptCard
-                                key={order.id}
-                                orderNumber={order.id}
-                                items={order.items}
-                                total={order.total}
-                                customerName={order.customerName || 'N/A'}
-                                seatNumber={order.seatNumber || 'N/A'}
-                                paymentMethod={order.paymentMethod || 'N/A'}
-                                createdAt={order.createdAt}
+                                orderNumber={selectedOrder.orderNumber}
+                                items={selectedOrder.items}
+                                total={selectedOrder.total}
+                                customerName={selectedOrder.customerName}
+                                seatNumber={selectedOrder.seatNumber}
+                                paymentMethod={selectedOrder.paymentMethod}
+                                createdAt={selectedOrder.createdAt}
                             />
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ) : pendingOrders.length === 0 ? (
+                        <div className="bg-white rounded-xl p-8 text-center shadow-md">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <MdReceipt className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h2 className="text-xl font-semibold text-gray-800 mb-2">No Pending Payments</h2>
+                            <p className="text-gray-600">All cash payments have been confirmed</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-6">
+                            {pendingOrders.map(order => (
+                                <div key={order.id} className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <MdReceipt className="w-5 h-5 text-gray-600" />
+                                                <h2 className="text-xl font-semibold text-gray-800">Order #{order.orderNumber}</h2>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <MdPerson className="w-4 h-4" />
+                                                    <span>{order.customerName}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <MdChair className="w-4 h-4" />
+                                                    <span>Seat {order.seatNumber}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-gray-600">
+                                                    <MdAccessTime className="w-4 h-4" />
+                                                    <span>{new Date(order.createdAt).toLocaleString()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-full md:w-auto">
+                                            <div className="bg-gray-50 rounded-lg p-4 text-right">
+                                                <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+                                                <p className="text-2xl font-bold text-gray-800">
+                                                    Rp {order.total.toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                                        <h3 className="font-semibold text-gray-800 mb-3">Order Items</h3>
+                                        <div className="space-y-2">
+                                            {order.items.map((item, index) => (
+                                                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium">{item.title}</span>
+                                                        <span className="text-sm text-gray-500">x{item.quantity}</span>
+                                                    </div>
+                                                    <span className="text-gray-800">Rp {(item.price * item.quantity).toLocaleString()}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => handleConfirmPayment(order.id)}
+                                            className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                                        >
+                                            <MdPayment className="w-5 h-5" />
+                                            Confirm Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
 };
 
-export default History;
+export default OrderConfirmation; 
