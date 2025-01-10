@@ -104,7 +104,7 @@ const HomeFirst = () => {
                     <div className="flex-1 flex flex-col items-start space-y-8 max-w-lg xl:ml-24 2xl:ml-60">
                         {/* Large Icon/Logo */}
                         <div className="w-full flex justify-center">
-                            <div className="h-48 w-96 2xl:h-64 2xl:w-[28rem] bg-Logo bg-contain bg-no-repeat bg-center"/>
+                            <div className="h-24 w-96 2xl:h-64 2xl:w-[28rem] bg-Logo bg-contain bg-no-repeat bg-center"/>
                         </div>
                         
                         {/* Description */}
@@ -116,7 +116,7 @@ const HomeFirst = () => {
 
                     {/* Right Side - Coffee Image */}
                     <div className="flex-1 flex justify-center items-center h-[525px]">
-                        <div className="h-[340px] w-[400px] xl:h-[442px] xl:w-[520px] 2xl:h-[510px] 2xl:w-[600px] bg-Coffee bg-cover bg-center bg-no-repeat rounded-2xl"/>
+                        <div className="h-[170px] w-[200px] sm:h-[255px] sm:w-[400px] md:h-[340px] md:h[400px] xl:h-[442px] xl:w-[520px] 2xl:h-[510px] 2xl:w-[600px] bg-Coffee bg-cover bg-center bg-no-repeat rounded-2xl"/>
                     </div>
                 </div>
             </div>
