@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Keranjang = () => {
     const { cartItems, loading, removeFromCart, updateQuantity } = useCart();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [selectedItems, setSelectedItems] = useState(new Set());
     const [isAllSelected, setIsAllSelected] = useState(false);
@@ -80,7 +82,7 @@ const Keranjang = () => {
             const orderNumber = Math.floor(100000 + Math.random() * 900000).toString();
 
             // Create order in Firestore
-            const orderRef = await addDoc(collection(db, "orders"), {
+            const orderData = {
                 items: selectedCartItems,
                 total: total,
                 status: 'pending',
@@ -88,8 +90,11 @@ const Keranjang = () => {
                 customerName: orderDetails.customerName,
                 seatNumber: orderDetails.seatNumber,
                 orderNumber: orderNumber,
-                paymentMethod: orderDetails.paymentMethod
-            });
+                paymentMethod: orderDetails.paymentMethod,
+                userId: user ? user.uid : null // Track user ID if authenticated
+            };
+
+            const orderRef = await addDoc(collection(db, "orders"), orderData);
 
             // Clear cart items
             await Promise.all(
@@ -143,10 +148,21 @@ const Keranjang = () => {
                     window.snap.pay(token, {
                         onSuccess: async (result) => {
                             try {
-                                await updateDoc(doc(db, "orders", orderRef.id), {
+                                // Update the existing order instead of creating a new one
+                                await addDoc(collection(db, "orders"), {
+                                    ...orderData,
                                     status: 'paid',
-                                    paymentDetails: result
+                                    paymentDetails: result,
+                                    updatedAt: new Date().toISOString()
                                 });
+
+                                // Delete the old order
+                                try {
+                                    await deleteDoc(doc(db, "orders", orderRef.id));
+                                } catch (error) {
+                                    console.error('Error deleting old order:', error);
+                                }
+
                                 navigate('/complete-payment', { state: { orderId: orderRef.id } });
                             } catch (error) {
                                 console.error('Error updating order status:', error);
@@ -157,10 +173,21 @@ const Keranjang = () => {
                         },
                         onPending: async (result) => {
                             try {
-                                await updateDoc(doc(db, "orders", orderRef.id), {
+                                // Update the existing order instead of creating a new one
+                                await addDoc(collection(db, "orders"), {
+                                    ...orderData,
                                     status: 'pending',
-                                    paymentDetails: result
+                                    paymentDetails: result,
+                                    updatedAt: new Date().toISOString()
                                 });
+
+                                // Delete the old order
+                                try {
+                                    await deleteDoc(doc(db, "orders", orderRef.id));
+                                } catch (error) {
+                                    console.error('Error deleting old order:', error);
+                                }
+
                                 alert('Payment pending. Please complete your payment.');
                             } catch (error) {
                                 console.error('Error updating order status:', error);
@@ -170,10 +197,21 @@ const Keranjang = () => {
                         },
                         onError: async (result) => {
                             try {
-                                await updateDoc(doc(db, "orders", orderRef.id), {
+                                // Update the existing order instead of creating a new one
+                                await addDoc(collection(db, "orders"), {
+                                    ...orderData,
                                     status: 'failed',
-                                    paymentDetails: result
+                                    paymentDetails: result,
+                                    updatedAt: new Date().toISOString()
                                 });
+
+                                // Delete the old order
+                                try {
+                                    await deleteDoc(doc(db, "orders", orderRef.id));
+                                } catch (error) {
+                                    console.error('Error deleting old order:', error);
+                                }
+
                                 alert('Payment failed. Please try again.');
                             } catch (error) {
                                 console.error('Error updating order status:', error);

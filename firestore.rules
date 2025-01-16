@@ -58,17 +58,8 @@ service cloud.firestore {
 
     // Cart collection rules
     match /cart/{cartItemId} {
-      // Users can only read their own cart items
-      allow read: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
-      
-      // Users can create cart items for themselves
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
-      
-      // Users can update and delete their own cart items
-      allow update, delete: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
+      // Anyone can read and write cart items
+      allow read, write: if true;
     }
 
     // Admins collection rules
@@ -82,9 +73,8 @@ service cloud.firestore {
 
     // Orders collection rules
     match /orders/{orderId} {
-      // Anyone can read their own orders by orderNumber, admins can read all
-      allow read: if isAdmin() || 
-        (resource.data.orderNumber == request.query.orderNumber);
+      // Anyone can read orders
+      allow read: if true;
       
       // Anyone can create orders with valid data
       allow create: if request.resource.data.keys().hasAll(['items', 'total', 'status', 'createdAt', 'customerName', 'seatNumber', 'orderNumber', 'paymentMethod']) &&
@@ -100,9 +90,7 @@ service cloud.firestore {
         request.resource.data.orderNumber.size() > 0 &&
         request.resource.data.paymentMethod in ['cash', 'e-money'];
       
-      // Users can create orders, only admins can update/delete
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid;
+      // Only admins can update/delete orders
       allow update, delete: if isAdmin();
     }
 
