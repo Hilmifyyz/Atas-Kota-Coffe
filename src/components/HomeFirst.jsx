@@ -3,14 +3,12 @@ import { useState, useEffect } from "react";
 import { collection, query, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { FaStar } from "react-icons/fa";
-import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
 const HomeFirst = () => {
     const [bestSellers, setBestSellers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [addingToCart, setAddingToCart] = useState(null);
-    const { user } = useAuth();
     const { addToCart } = useCart();
     const navigate = useNavigate();
 
@@ -69,11 +67,6 @@ const HomeFirst = () => {
     const handleAddToCart = async (e, product) => {
         e.preventDefault();
         e.stopPropagation();
-
-        if (!user) {
-            navigate('/login');
-            return;
-        }
 
         try {
             setAddingToCart(product.id);

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getProducts } from "../firebase";
 import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
 
 const Menu = () => {
     const [products, setProducts] = useState([]);
@@ -11,7 +10,6 @@ const Menu = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [showToast, setShowToast] = useState(false);
     const { addToCart } = useCart();
-    const { user } = useAuth();
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -38,14 +36,14 @@ const Menu = () => {
     const handleAddToCart = async (e, product) => {
         e.preventDefault(); // Prevent navigation to product details
         
-        if (!user) {
-            window.location.href = '/login';
-            return;
+        try {
+            await addToCart(product);
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 2000);
+        } catch (error) {
+            console.error("Error adding to cart:", error);
+            alert("Failed to add item to cart. Please try again.");
         }
-
-        await addToCart(product);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 2000);
     };
 
     return (

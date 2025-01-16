@@ -139,11 +139,6 @@ const Item = () => {
     };
 
     const handleAddToCart = async () => {
-        if (!user) {
-            navigate('/login');
-            return;
-        }
-
         try {
             setAddingToCart(true);
             await addToCart(product, quantity);
