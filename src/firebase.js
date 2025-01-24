@@ -4,15 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, orderBy, deleteDoc, updateDoc } from "firebase/firestore";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyD9sYkHoUm9HiBmw_gQPZ5LKXXXmLvrVfg",
-  authDomain: "ataskota.firebaseapp.com",
-  projectId: "ataskota",
-  storageBucket: "ataskota.appspot.com",
-  messagingSenderId: "345652813951",
-  appId: "1:345652813951:web:f60124bed7d7ce23955f4a",
-  measurementId: "G-MXRZPX5GCG"
-};
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
