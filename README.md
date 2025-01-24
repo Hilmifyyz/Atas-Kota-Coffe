@@ -1,7 +1,31 @@
-Hellooo! 👋👋
+# Atas Kota Coffee
 
-Welcome to Atas Kota Coffee! 
-This is our website where you can see what we have to offer.
-you can see our menu, our story, and even our contact information.
-and you can order menu in here too!
-We hope you enjoy your visit and come back soon!
+<div>
+    <img src="src\assets\Photos\Logo.png" alt="Atas Kota Coffee Logo" width="200" style="border-radius: 20px;" />
+</div>
+
+## 🎯 Fitur Utama
+
+- **Homepage**
+  - Melihat informasi tentang Atas Kota Coffee
+  - Melihat Lokasi dan jam buka
+  - Melihat menu dan harga
+
+- **Menu Page**
+  - Melihat Menu dan Harga
+  - Melihat Deskripsi Menu
+  - Menambah ke keranjang
+
+- **Keranjang**
+  - Mengecek ulang pesanan
+  - Mengubah jumlah pesanan
+  - Menghapus pesanan
+
+- **Payment**
+  - Input Nama dan No. Meja
+  - Bayar di kasir / MidTrans
+
+- **Admin**
+  - Mengubah / Menambah / Menghapus Menu
+  - Menyetujui Pembayaran
+  - Riwayat Pemesanan
