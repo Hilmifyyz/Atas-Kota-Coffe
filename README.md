@@ -1,6 +1,6 @@
 # Atas Kota Coffee
 
-<div>
+<div align="center">
     <img src="src\assets\Photos\Logo.png" alt="Atas Kota Coffee Logo" width="200" style="border-radius: 20px;" />
 </div>
 
