@@ -1,8 +1,31 @@
-# React + Vite
+# Atas Kota Coffee
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center">
+    <img src="src\assets\Photos\Logo.png" alt="Atas Kota Coffee Logo" width="200" style="border-radius: 20px;" />
+</div>
 
-Currently, two official plugins are available:
+## 🎯 Fitur Utama
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Homepage**
+  - Melihat informasi tentang Atas Kota Coffee
+  - Melihat Lokasi dan jam buka
+  - Melihat menu dan harga
+
+- **Menu Page**
+  - Melihat Menu dan Harga
+  - Melihat Deskripsi Menu
+  - Menambah ke keranjang
+
+- **Keranjang**
+  - Mengecek ulang pesanan
+  - Mengubah jumlah pesanan
+  - Menghapus pesanan
+
+- **Payment**
+  - Input Nama dan No. Meja
+  - Bayar di kasir / MidTrans
+
+- **Admin**
+  - Mengubah / Menambah / Menghapus Menu
+  - Menyetujui Pembayaran
+  - Riwayat Pemesanan
