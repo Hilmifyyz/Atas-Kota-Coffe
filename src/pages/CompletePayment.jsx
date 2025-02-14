@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useAuth } from '../context/AuthContext';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -10,60 +9,153 @@ import jsPDF from 'jspdf';
 const CompletePayment = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [downloading, setDownloading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth();
     const receiptRef = useRef();
 
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                if (!location.state?.orderId) {
-                    navigate('/menu');
+                setLoading(true);
+                setError(null);
+
+                // Check if we have the required state
+                if (!location.state?.orderId || !location.state?.customerName || !location.state?.seatNumber) {
+                    throw new Error("Missing required order information");
+                }
+
+                // First try to get the order directly by ID
+                const orderDoc = await getDoc(doc(db, "orders", location.state.orderId));
+                
+                if (orderDoc.exists()) {
+                    setOrder({
+                        id: orderDoc.id,
+                        ...orderDoc.data()
+                    });
                     return;
                 }
 
-                const orderDoc = await getDoc(doc(db, "orders", location.state.orderId));
-                if (!orderDoc.exists()) {
-                    throw new Error("Order not found");
+                // If order not found by ID, try to find it by customer details
+                const ordersRef = collection(db, "orders");
+                const q = query(
+                    ordersRef,
+                    where("customerName", "==", location.state.customerName),
+                    where("seatNumber", "==", location.state.seatNumber),
+                    where("status", "in", ["paid", "pending"])
+                );
+
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    throw new Error("Order not found. Please check with the staff.");
                 }
 
-                setOrder({
-                    id: orderDoc.id,
-                    ...orderDoc.data()
-                });
+                // Get the most recent order for this customer
+                const orders = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt ? new Date(doc.data().createdAt) : new Date(0)
+                }));
+
+                // Sort by creation date (most recent first)
+                orders.sort((a, b) => b.createdAt - a.createdAt);
+                
+                setOrder(orders[0]);
+
             } catch (error) {
                 console.error("Error fetching order:", error);
-                alert("Failed to load order details");
-                navigate('/menu');
+                
+                // Handle different types of errors
+                if (error.code === 'permission-denied') {
+                    setError("Access denied. Please check your connection and try again.");
+                } else if (error.code === 'unavailable' || error.code === 'network-request-failed') {
+                    setError("Network error. Please check your internet connection.");
+                } else {
+                    setError(error.message || "Failed to load order details. Please try again.");
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchOrder();
-    }, [location.state, navigate]);
+    }, [location.state]);
+
+    // If there's an error, show error state with retry option
+    if (error) {
+        return (
+            <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center px-4">
+                <div className="bg-white rounded-xl p-8 max-w-md w-full text-center shadow-lg">
+                    <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Order</h2>
+                    <p className="text-gray-600 mb-6">{error}</p>
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                        <button
+                            onClick={() => navigate('/cart')}
+                            className="px-6 py-2 bg-[#E6D5B8] text-gray-900 rounded-xl hover:bg-[#d4b87c] transition-colors"
+                        >
+                            Return to Cart
+                        </button>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#E6D5B8] border-t-transparent"></div>
+            </div>
+        );
+    }
+
+    // If no order data, redirect to menu
+    if (!order) {
+        navigate('/menu');
+        return null;
+    }
 
     const formatDate = (dateString) => {
-        const options = { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
-        return new Date(dateString).toLocaleDateString('id-ID', options);
+        try {
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'Invalid Date';
+        }
     };
 
     const handleDownloadPDF = async () => {
+        if (!order) return;
+
         try {
             setDownloading(true);
             const receipt = receiptRef.current;
+            if (!receipt) throw new Error('Receipt element not found');
 
             // Improve image quality with better scale
             const canvas = await html2canvas(receipt, {
-                scale: 2, // Increase quality
+                scale: 2,
                 useCORS: true,
                 backgroundColor: '#ffffff',
                 logging: false
@@ -103,14 +195,6 @@ const CompletePayment = () => {
             setDownloading(false);
         }
     };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#FFFBF2] flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E6D5B8]"></div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-[#FFFBF2] pt-32 px-4 md:px-8">
@@ -168,7 +252,7 @@ const CompletePayment = () => {
                         {/* Order Items */}
                         <div className="space-y-4">
                             <h3 className="font-medium text-gray-800 mb-2">Order Details</h3>
-                            {order.items.map((item, index) => (
+                            {order.items?.map((item, index) => (
                                 <div key={index} className="flex justify-between text-sm py-2 border-b border-gray-100 last:border-b-0">
                                     <div>
                                         <p className="font-medium">{item.title}</p>

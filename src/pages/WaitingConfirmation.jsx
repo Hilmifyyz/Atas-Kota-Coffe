@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useAuth } from '../context/AuthContext';
 
 const WaitingConfirmation = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
-    const { user } = useAuth();
     const orderId = location.state?.orderId;
+    const customerName = location.state?.customerName;
+    const seatNumber = location.state?.seatNumber;
 
     useEffect(() => {
-        if (!user || !orderId) {
+        if (!orderId || !customerName || !seatNumber) {
             navigate('/');
             return;
         }
@@ -27,7 +27,13 @@ const WaitingConfirmation = () => {
 
                 // If order is paid, redirect to complete payment
                 if (orderData.status === 'paid') {
-                    navigate('/complete-payment', { state: { orderId: doc.id } });
+                    navigate('/complete-payment', { 
+                        state: { 
+                            orderId: doc.id,
+                            customerName: customerName,
+                            seatNumber: seatNumber
+                        } 
+                    });
                 }
             } else {
                 console.error("Order not found");
@@ -36,7 +42,7 @@ const WaitingConfirmation = () => {
         });
 
         return () => unsubscribe();
-    }, [orderId, user, navigate]);
+    }, [orderId, customerName, seatNumber, navigate]);
 
     if (loading) {
         return (

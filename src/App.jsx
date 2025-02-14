@@ -10,7 +10,6 @@ import Keranjang from './pages/Keranjang';
 import Login from './pages/Login';
 import Footer from './components/Footer';
 import HomeGallery from './components/HomeGallery';
-import CheckOut from './pages/CheckOut';
 import Detail from './pages/detail';
 import Admin from './pages/admin/Product';
 import Transaction from './pages/admin/Transaction';
@@ -81,7 +80,6 @@ function App() {
                       <Route path='/menu/item/:id' element={<Item/>} />
                       <Route path='/cart' element={<Keranjang/>} />
                       <Route path='/login' element={<Login/>} />
-                      <Route path='/checkout' element={<CheckOut/>} />
                       <Route path='/detail' element={<Detail/>} />
                       <Route path='/complete-payment' element={<CompletePayment />} />
                       <Route path='/waiting-confirmation' element={<WaitingConfirmation />} />

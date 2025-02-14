@@ -3,11 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { collection, addDoc, doc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
 
 const Keranjang = () => {
     const { cartItems, loading, removeFromCart, updateQuantity } = useCart();
-    const { user } = useAuth();
     const navigate = useNavigate();
     const [selectedItems, setSelectedItems] = useState(new Set());
     const [isAllSelected, setIsAllSelected] = useState(false);
@@ -90,8 +88,7 @@ const Keranjang = () => {
                 customerName: orderDetails.customerName,
                 seatNumber: orderDetails.seatNumber,
                 orderNumber: orderNumber,
-                paymentMethod: orderDetails.paymentMethod,
-                userId: user ? user.uid : null // Track user ID if authenticated
+                paymentMethod: orderDetails.paymentMethod
             };
 
             const orderRef = await addDoc(collection(db, "orders"), orderData);
@@ -108,13 +105,31 @@ const Keranjang = () => {
 
             // Handle different payment methods
             if (orderDetails.paymentMethod === 'cash') {
-                navigate('/waiting-confirmation', { state: { orderId: orderRef.id } });
+                navigate('/waiting-confirmation', { 
+                    state: { 
+                        orderId: orderRef.id,
+                        customerName: orderDetails.customerName,
+                        seatNumber: orderDetails.seatNumber
+                    } 
+                });
             } else {
-                // For e-money payment, proceed with Midtrans
+                // For e-money payment
                 try {
+                    // First check if the server is available
+                    const serverCheck = await fetch('http://localhost:5000/health-check', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!serverCheck.ok) {
+                        throw new Error('Payment server is currently unavailable. Please try cash payment or try again later.');
+                    }
+
                     // Check if snap is loaded
                     if (typeof window.snap === 'undefined') {
-                        throw new Error('Midtrans Snap is not loaded yet. Please try again.');
+                        throw new Error('Payment system is not ready. Please try cash payment or try again later.');
                     }
 
                     // Get token from server
@@ -139,16 +154,21 @@ const Keranjang = () => {
                     });
 
                     if (!response.ok) {
-                        throw new Error('Failed to generate payment token');
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Failed to generate payment token. Please try cash payment.');
                     }
 
                     const { token } = await response.json();
+
+                    if (!token) {
+                        throw new Error('Invalid payment token received. Please try cash payment.');
+                    }
 
                     // Open Midtrans Snap payment page
                     window.snap.pay(token, {
                         onSuccess: async (result) => {
                             try {
-                                // Update the existing order instead of creating a new one
+                                // Update order status
                                 await addDoc(collection(db, "orders"), {
                                     ...orderData,
                                     status: 'paid',
@@ -156,24 +176,29 @@ const Keranjang = () => {
                                     updatedAt: new Date().toISOString()
                                 });
 
-                                // Delete the old order
+                                // Delete the pending order
                                 try {
                                     await deleteDoc(doc(db, "orders", orderRef.id));
                                 } catch (error) {
                                     console.error('Error deleting old order:', error);
                                 }
 
-                                navigate('/complete-payment', { state: { orderId: orderRef.id } });
+                                navigate('/complete-payment', { 
+                                    state: { 
+                                        orderId: orderRef.id,
+                                        customerName: orderDetails.customerName,
+                                        seatNumber: orderDetails.seatNumber
+                                    } 
+                                });
                             } catch (error) {
                                 console.error('Error updating order status:', error);
-                                alert('Payment recorded but failed to update order status.');
+                                alert('Your payment was successful but we encountered an error updating the order. Please contact staff with your order number: ' + orderNumber);
                             } finally {
                                 setProcessingPayment(false);
                             }
                         },
                         onPending: async (result) => {
                             try {
-                                // Update the existing order instead of creating a new one
                                 await addDoc(collection(db, "orders"), {
                                     ...orderData,
                                     status: 'pending',
@@ -181,23 +206,30 @@ const Keranjang = () => {
                                     updatedAt: new Date().toISOString()
                                 });
 
-                                // Delete the old order
                                 try {
                                     await deleteDoc(doc(db, "orders", orderRef.id));
                                 } catch (error) {
                                     console.error('Error deleting old order:', error);
                                 }
 
-                                alert('Payment pending. Please complete your payment.');
+                                alert('Payment is pending. Please complete your payment using the provided instructions. Your order number is: ' + orderNumber);
+                                navigate('/waiting-confirmation', { 
+                                    state: { 
+                                        orderId: orderRef.id,
+                                        customerName: orderDetails.customerName,
+                                        seatNumber: orderDetails.seatNumber
+                                    } 
+                                });
                             } catch (error) {
                                 console.error('Error updating order status:', error);
+                                alert('Payment is pending. Please complete your payment and contact staff with your order number: ' + orderNumber);
                             } finally {
                                 setProcessingPayment(false);
                             }
                         },
                         onError: async (result) => {
                             try {
-                                // Update the existing order instead of creating a new one
+                                // Update order status to failed
                                 await addDoc(collection(db, "orders"), {
                                     ...orderData,
                                     status: 'failed',
@@ -205,14 +237,13 @@ const Keranjang = () => {
                                     updatedAt: new Date().toISOString()
                                 });
 
-                                // Delete the old order
                                 try {
                                     await deleteDoc(doc(db, "orders", orderRef.id));
                                 } catch (error) {
                                     console.error('Error deleting old order:', error);
                                 }
 
-                                alert('Payment failed. Please try again.');
+                                alert('Payment failed. Please try again or choose cash payment. Your order number was: ' + orderNumber);
                             } catch (error) {
                                 console.error('Error updating order status:', error);
                             } finally {
@@ -220,12 +251,45 @@ const Keranjang = () => {
                             }
                         },
                         onClose: () => {
+                            // If the user closes the payment window, suggest cash payment
+                            alert('Payment window closed. You can try again or proceed with cash payment.');
                             setProcessingPayment(false);
                         }
                     });
                 } catch (error) {
                     console.error('Error processing payment:', error);
-                    alert('Failed to process payment: ' + error.message);
+                    
+                    // Show a user-friendly error message with alternative
+                    const errorMessage = 'Payment processing failed: ' + error.message + 
+                        '\n\nWould you like to switch to cash payment instead?';
+                    
+                    if (window.confirm(errorMessage)) {
+                        // Update order to cash payment
+                        try {
+                            await addDoc(collection(db, "orders"), {
+                                ...orderData,
+                                paymentMethod: 'cash',
+                                updatedAt: new Date().toISOString()
+                            });
+
+                            try {
+                                await deleteDoc(doc(db, "orders", orderRef.id));
+                            } catch (error) {
+                                console.error('Error deleting old order:', error);
+                            }
+
+                            navigate('/waiting-confirmation', { 
+                                state: { 
+                                    orderId: orderRef.id,
+                                    customerName: orderDetails.customerName,
+                                    seatNumber: orderDetails.seatNumber
+                                } 
+                            });
+                        } catch (error) {
+                            console.error('Error updating to cash payment:', error);
+                            alert('Error switching to cash payment. Please try placing your order again.');
+                        }
+                    }
                     setProcessingPayment(false);
                 }
             }
@@ -239,7 +303,7 @@ const Keranjang = () => {
     if (loading) {
         return (
             <div className="w-screen min-h-screen absolute top-0 left-0 right-0 bg-[#FFFBF2] flex items-center justify-center">
-                Loading...
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#b69d74]"></div>
             </div>
         );
     }
@@ -252,7 +316,7 @@ const Keranjang = () => {
                     <div className="bg-white rounded-2xl p-8 w-full max-w-md relative">
                         <button
                             onClick={() => setShowOrderForm(false)}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100 p-2"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -273,7 +337,7 @@ const Keranjang = () => {
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#E6D5B8] focus:ring focus:ring-[#E6D5B8] focus:ring-opacity-50 transition-colors pl-10"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#b69d74] focus:ring focus:ring-[#b69d74] focus:ring-opacity-30 transition-all duration-200 pl-10"
                                             value={orderDetails.customerName}
                                             onChange={(e) => setOrderDetails(prev => ({
                                                 ...prev,
@@ -297,7 +361,7 @@ const Keranjang = () => {
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#E6D5B8] focus:ring focus:ring-[#E6D5B8] focus:ring-opacity-50 transition-colors pl-10"
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-[#b69d74] focus:ring focus:ring-[#b69d74] focus:ring-opacity-30 transition-all duration-200 pl-10"
                                             value={orderDetails.seatNumber}
                                             onChange={(e) => setOrderDetails(prev => ({
                                                 ...prev,
@@ -330,13 +394,13 @@ const Keranjang = () => {
                                                 ...prev,
                                                 paymentMethod: e.target.value
                                             }))}
-                                            className="w-4 h-4 text-[#E6D5B8] border-gray-300 focus:ring-[#E6D5B8]"
+                                            className="w-4 h-4 text-[#b69d74] border-gray-300 focus:ring-[#b69d74]"
                                         />
                                         <div className="ml-3 flex-1">
                                             <span className="font-medium text-gray-900">Bayar di Kasir</span>
                                             <p className="text-sm text-gray-500">Pay at the cashier counter</p>
                                         </div>
-                                        <div className="opacity-0 group-hover:opacity-100 absolute right-4 text-[#E6D5B8] transition-opacity">
+                                        <div className="opacity-0 group-hover:opacity-100 absolute right-4 text-[#b69d74] transition-opacity">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
@@ -353,13 +417,13 @@ const Keranjang = () => {
                                                 ...prev,
                                                 paymentMethod: e.target.value
                                             }))}
-                                            className="w-4 h-4 text-[#E6D5B8] border-gray-300 focus:ring-[#E6D5B8]"
+                                            className="w-4 h-4 text-[#b69d74] border-gray-300 focus:ring-[#b69d74]"
                                         />
                                         <div className="ml-3 flex-1">
                                             <span className="font-medium text-gray-900">E-Money Payment</span>
                                             <p className="text-sm text-gray-500">Pay using digital payment methods</p>
                                         </div>
-                                        <div className="opacity-0 group-hover:opacity-100 absolute right-4 text-[#E6D5B8] transition-opacity">
+                                        <div className="opacity-0 group-hover:opacity-100 absolute right-4 text-[#b69d74] transition-opacity">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
@@ -372,7 +436,7 @@ const Keranjang = () => {
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
                                         <p className="text-sm text-gray-500">Total Amount</p>
-                                        <p className="text-2xl font-bold text-gray-900">Rp. {calculateTotal().toLocaleString()}</p>
+                                        <p className="text-2xl font-bold text-gray-900">Rp {calculateTotal().toLocaleString()}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm text-gray-500">Selected Items</p>
@@ -391,11 +455,11 @@ const Keranjang = () => {
                                     <button
                                         type="submit"
                                         disabled={processingPayment}
-                                        className="flex-1 px-4 py-3 bg-[#E6D5B8] text-gray-900 rounded-xl hover:bg-[#d4b87c] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="flex-1 px-4 py-3 bg-[#b69d74] text-white rounded-xl hover:bg-[#a38a67] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
                                         {processingPayment ? (
                                             <>
-                                                <svg className="animate-spin h-5 w-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
@@ -417,98 +481,166 @@ const Keranjang = () => {
                 </div>
             )}
 
-            <div className="pt-32 xl:px-56 lg:px-24 md:px-14 sm:px-20 px-4">
-                <h1 className="text-left mb-8 font-sans font-[700] text-[36px]">Keranjang</h1>
-                <div className="flex flex-col md:flex-row justify-between gap-8">
+            <div className="container mx-auto px-4 pt-32 pb-16 max-w-7xl">
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={handleDeleteItems}
+                            disabled={selectedItems.size === 0}
+                            className="text-red-500 hover:text-red-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Selected
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row gap-8">
                     {/* Left Section - Cart Items */}
                     <div className="flex-1">
                         {/* Header with Select All */}
-                        <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-[#b1b1b1] mb-4">
-                            <div className="flex items-center gap-2">
-                                <input 
-                                    type="checkbox" 
-                                    className="w-5 h-5"
-                                    checked={isAllSelected}
-                                    onChange={toggleSelectAll}
-                                />
-                                <span className="pl-4 font-sans font-[700] text-xl">Pilih Semua</span>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <input 
+                                        type="checkbox" 
+                                        className="w-5 h-5 rounded text-[#b69d74] focus:ring-[#b69d74]"
+                                        checked={isAllSelected}
+                                        onChange={toggleSelectAll}
+                                    />
+                                    <span className="font-medium text-gray-700">Select All Items</span>
+                                </div>
+                                <span className="text-sm text-gray-500">{cartItems.length} items</span>
                             </div>
-                            <button 
-                                className="text-gray-600 pr-10 font-sans font-[700] text-xl"
-                                onClick={handleDeleteItems}
-                                disabled={selectedItems.size === 0}
-                            >
-                                Hapus
-                            </button>
                         </div>
 
                         {/* Cart Items */}
                         {cartItems.length === 0 ? (
-                            <div className="bg-white rounded-lg border border-[#b1b1b1] p-8 text-center">
-                                <p className="text-gray-600 font-sans font-[500]">Your cart is empty</p>
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+                                <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet</p>
+                                <button
+                                    onClick={() => navigate('/menu')}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#b69d74] hover:bg-[#a38a67] transition-colors"
+                                >
+                                    Continue Shopping
+                                </button>
                             </div>
                         ) : (
-                            cartItems.map(item => (
-                                <div key={item.id} className="bg-white rounded-lg border border-[#b1b1b1] p-4 mb-4">
-                                    <div className="flex items-start gap-4">
-                                        <input 
-                                            type="checkbox" 
-                                            className="w-5 h-5 mt-2"
-                                            checked={selectedItems.has(item.id)}
-                                            onChange={() => toggleSelectItem(item.id)}
-                                        />
-                                        <div 
-                                            className="w-32 h-32 rounded-lg bg-center bg-cover bg-no-repeat"
-                                            style={{ backgroundImage: `url(${item.imageUrl})` }}
-                                        />
-                                        <div className="flex-1 text-left">
-                                            <h3 className="font-sans font-[700] text-lg">{item.title}</h3>
-                                            <div className="flex justify-between items-center mt-4">
-                                                <span className="font-sans font-[700]">Rp. {item.price.toLocaleString()}</span>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex items-center">
+                            <div className="space-y-4">
+                                {cartItems.map(item => (
+                                    <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+                                        <div className="flex gap-4">
+                                            <input 
+                                                type="checkbox" 
+                                                className="w-5 h-5 mt-2 rounded text-[#b69d74] focus:ring-[#b69d74]"
+                                                checked={selectedItems.has(item.id)}
+                                                onChange={() => toggleSelectItem(item.id)}
+                                            />
+                                            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                                                <img 
+                                                    src={item.imageUrl} 
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between">
+                                                    <h3 className="font-medium text-gray-900">{item.title}</h3>
+                                                    <button
+                                                        onClick={() => removeFromCart(item.id)}
+                                                        className="text-gray-400 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-gray-500 mt-1">{item.category}</p>
+                                                <div className="flex justify-between items-center mt-4">
+                                                    <span className="font-medium text-gray-900">
+                                                        Rp {item.price.toLocaleString()}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
                                                         <button 
-                                                            className="w-8 h-8 border rounded-l-lg bg-[#FFFBF2]"
+                                                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                                                             onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                                                         >
-                                                            -
+                                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                            </svg>
                                                         </button>
                                                         <input 
                                                             type="text" 
                                                             value={item.quantity} 
                                                             onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                                                            className="w-12 h-8 text-center border-y bg-[#FFFBF2]" 
+                                                            className="w-12 h-8 text-center border rounded-lg" 
                                                         />
                                                         <button 
-                                                            className="w-8 h-8 border rounded-r-lg bg-[#FFFBF2]"
+                                                            className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                                                             onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                                                         >
-                                                            +
+                                                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                            </svg>
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                            </div>
                         )}
                     </div>
 
                     {/* Right Section - Summary */}
-                    <div className="w-full md:w-80">
-                        <div className="bg-white rounded-lg border border-[#b1b1b1] p-4">
-                            <h2 className="font-medium text-lg mb-4">Ringkasan</h2>
-                            <div className="flex justify-between mb-4">
-                                <span>Total</span>
-                                <span className="font-medium">Rp. {calculateTotal().toLocaleString()}</span>
+                    <div className="w-full lg:w-96">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                            <h2 className="text-lg font-medium text-gray-900 mb-6">Order Summary</h2>
+                            
+                            <div className="space-y-4 mb-6">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Selected Items</span>
+                                    <span className="font-medium text-gray-900">{selectedItems.size} items</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-900 font-medium">Total</span>
+                                    <span className="text-xl font-bold text-gray-900">
+                                        Rp {calculateTotal().toLocaleString()}
+                                    </span>
+                                </div>
                             </div>
+
                             <button 
                                 onClick={() => setShowOrderForm(true)}
                                 disabled={selectedItems.size === 0 || processingPayment}
-                                className="w-full bg-[#E6D5B8] text-black py-2 rounded-lg hover:bg-[#d4b87c] transition-colors disabled:opacity-50"
+                                className="w-full py-3 bg-[#b69d74] text-white rounded-xl font-medium hover:bg-[#a38a67] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                {processingPayment ? 'Processing...' : 'Pay Now'}
+                                {processingPayment ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Processing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Proceed to Checkout</span>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </svg>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>
